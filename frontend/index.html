@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>QuantumAOI</title>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Inter', Arial, sans-serif;
+      background: linear-gradient(135deg, #0f172a, #1e293b);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      color: white;
+    }
+
+    .container {
+      width: 700px;
+      padding: 30px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(15px);
+      box-shadow: 0 8px 40px rgba(0,0,0,0.4);
+    }
+
+    h1 {
+      margin-bottom: 5px;
+      font-weight: 600;
+    }
+
+    .subtitle {
+      margin-top: 0;
+      margin-bottom: 20px;
+      color: #94a3b8;
+    }
+
+    textarea {
+      width: 100%;
+      padding: 14px;
+      border-radius: 10px;
+      border: none;
+      outline: none;
+      resize: none;
+      font-size: 14px;
+      background: rgba(255,255,255,0.08);
+      color: white;
+    }
+
+    .row {
+      display: flex;
+      gap: 10px;
+      margin-top: 15px;
+    }
+
+    select {
+      flex: 1;
+      padding: 10px;
+      border-radius: 8px;
+      border: none;
+      background: rgba(255,255,255,0.08);
+      color: white;
+    }
+
+    button {
+      padding: 12px 20px;
+      border-radius: 10px;
+      border: none;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      color: white;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(99,102,241,0.4);
+    }
+
+    .output {
+      margin-top: 20px;
+      padding: 15px;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.06);
+      min-height: 120px;
+      white-space: pre-wrap;
+      color: #e2e8f0;
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .copy-btn {
+      margin-top: 10px;
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+
+    .copy-btn:hover {
+      background: rgba(255,255,255,0.1);
+    }
+
+  </style>
+
+</head>
+
+<body>
+
+  <div class="container">
+
+    <h1>QuantumAOI</h1>
+    <p class="subtitle">Rewrite your communication with confidence</p>
+
+    <textarea id="inputText" rows="5" placeholder="Paste your message..."></textarea>
+
+    <div class="row">
+      <select id="context">
+        <option>Email</option>
+        <option>LinkedIn</option>
+        <option>Job Application</option>
+        <option>Message</option>
+      </select>
+
+      <select id="tone">
+        <option>Professional</option>
+        <option>Confident</option>
+        <option>Polite</option>
+      </select>
+
+      <button onclick="rewriteText()">Rewrite</button>
+    </div>
+
+    <div class="output" id="output">
+      Your improved message will appear here...
+    </div>
+
+    <button class="copy-btn" onclick="copyText()">Copy</button>
+
+  </div>
+
+  <script>
+    async function rewriteText() {
+      const output = document.getElementById("output");
+      output.innerText = "Rewriting... ⏳";
+
+      const text = document.getElementById("inputText").value;
+      const context = document.getElementById("context").value;
+      const tone = document.getElementById("tone").value;
+
+      try {
+        const response = await fetch("http://127.0.0.1:8000/rewrite", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ text, context, tone })
+        });
+
+        const data = await response.json();
+        output.innerText = data.rewritten_text;
+
+      } catch (error) {
+        output.innerText = "Something went wrong. Please try again.";
+      }
+    }
+
+    function copyText() {
+      const text = document.getElementById("output").innerText;
+      navigator.clipboard.writeText(text);
+      alert("Copied to clipboard!");
+    }
+  </script>
+
+</body>
+</html>
