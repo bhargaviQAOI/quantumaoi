@@ -1,3 +1,4 @@
+import json
 from typing import Literal
 
 from fastapi import FastAPI, HTTPException
@@ -55,6 +56,13 @@ TONE_GUIDANCE = {
     "Futuristic": "Sound sharp, innovative, and forward-looking while staying understandable.",
 }
 
+STYLE_GUIDANCE = {
+    "default": "Keep the rewrite balanced and natural.",
+    "confident": "Dial up clarity and confidence slightly while staying professional.",
+    "short": "Make the wording shorter, sharper, and easier to scan.",
+    "friendly": "Make it feel more human, warm, and approachable.",
+}
+
 class RewriteRequest(BaseModel):
     text: str = Field(..., min_length=1, max_length=5000)
     context: Literal[
@@ -91,6 +99,7 @@ class RewriteRequest(BaseModel):
         "Modern Casual",
         "Futuristic",
     ]
+    style: Literal["default", "confident", "short", "friendly"] = "default"
 
     @field_validator("text")
     @classmethod
@@ -110,6 +119,32 @@ def get_openai_client() -> OpenAI:
     return OpenAI(api_key=api_key)
 
 
+def extract_versions(content: str) -> list[dict[str, str]]:
+    try:
+        payload = json.loads(content)
+    except json.JSONDecodeError as exc:
+        raise HTTPException(status_code=502, detail="The AI service returned an invalid response format.") from exc
+
+    versions = payload.get("versions")
+    if not isinstance(versions, list) or len(versions) < 2:
+        raise HTTPException(status_code=502, detail="The AI service did not return enough rewrite versions.")
+
+    normalized_versions = []
+    for index, item in enumerate(versions[:2]):
+        text = item.get("text") if isinstance(item, dict) else None
+        if not isinstance(text, str) or not text.strip():
+            raise HTTPException(status_code=502, detail="One of the rewrite versions was empty.")
+        label = item.get("label") if isinstance(item, dict) else None
+        normalized_versions.append(
+            {
+                "label": label if isinstance(label, str) and label.strip() else f"Version {'AB'[index]}",
+                "text": text.strip(),
+            }
+        )
+
+    return normalized_versions
+
+
 @app.post("/rewrite")
 def rewrite_text(request: RewriteRequest):
     context_guidance = CONTEXT_GUIDANCE.get(
@@ -120,6 +155,10 @@ def rewrite_text(request: RewriteRequest):
         request.tone,
         "Use a clear, natural, and appropriate tone for the message.",
     )
+    style_guidance = STYLE_GUIDANCE.get(
+        request.style,
+        "Keep the rewrite balanced and natural.",
+    )
 
     prompt = f"""
 You are a professional communication coach.
@@ -127,16 +166,27 @@ You are a professional communication coach.
 Rewrite the following text based on:
 Context: {request.context}
 Tone: {request.tone}
+Style preference: {request.style}
 
 Context guidance: {context_guidance}
 Tone guidance: {tone_guidance}
+Style guidance: {style_guidance}
 
 Goals:
 - Keep the original meaning intact.
 - Improve clarity, flow, grammar, and readability.
 - Make the message sound natural and appropriate for the selected context and tone.
 - Avoid sounding robotic, overly formal, or generic.
-- Return only the rewritten text with no extra commentary.
+- Return exactly 2 distinct rewrite versions.
+- Version A should be the safest, polished option.
+- Version B should be a slightly different take that still fits the same context and tone.
+- Return valid JSON only in this format:
+  {{
+    "versions": [
+      {{"label": "Version A", "text": "..." }},
+      {{"label": "Version B", "text": "..." }}
+    ]
+  }}
 
 Text:
 {request.text}
@@ -167,6 +217,8 @@ Text:
     if not rewritten_text:
         raise HTTPException(status_code=502, detail="The AI service returned an empty response.")
 
+    versions = extract_versions(rewritten_text)
+
     return {
-        "rewritten_text": rewritten_text
+        "versions": versions
     }
