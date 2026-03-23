@@ -63,6 +63,11 @@ STYLE_GUIDANCE = {
     "friendly": "Make it feel more human, warm, and approachable.",
 }
 
+SYSTEM_PROMPT = (
+    "You rewrite real-world messages for clarity, tone, and professionalism. "
+    "Be concise, natural, and practical."
+)
+
 class RewriteRequest(BaseModel):
     text: str = Field(..., min_length=1, max_length=5000)
     context: Literal[
@@ -161,34 +166,31 @@ def rewrite_text(request: RewriteRequest):
     )
 
     prompt = f"""
-You are a professional communication coach.
+Return valid JSON only:
+{{
+  "versions": [
+    {{"label": "Version A", "text": "..."}},
+    {{"label": "Version B", "text": "..."}}
+  ]
+}}
 
-Rewrite the following text based on:
-Context: {request.context}
-Tone: {request.tone}
-Style preference: {request.style}
+Rewrite the message using:
+- Context: {request.context}
+- Tone: {request.tone}
+- Style: {request.style}
+- Context guidance: {context_guidance}
+- Tone guidance: {tone_guidance}
+- Style guidance: {style_guidance}
 
-Context guidance: {context_guidance}
-Tone guidance: {tone_guidance}
-Style guidance: {style_guidance}
+Rules:
+- Keep the original meaning.
+- Improve clarity, grammar, and flow.
+- Sound natural, not robotic.
+- Keep both versions concise.
+- Version A = safest polished option.
+- Version B = slightly different but still appropriate.
 
-Goals:
-- Keep the original meaning intact.
-- Improve clarity, flow, grammar, and readability.
-- Make the message sound natural and appropriate for the selected context and tone.
-- Avoid sounding robotic, overly formal, or generic.
-- Return exactly 2 distinct rewrite versions.
-- Version A should be the safest, polished option.
-- Version B should be a slightly different take that still fits the same context and tone.
-- Return valid JSON only in this format:
-  {{
-    "versions": [
-      {{"label": "Version A", "text": "..." }},
-      {{"label": "Version B", "text": "..." }}
-    ]
-  }}
-
-Text:
+Message:
 {request.text}
 """
 
@@ -197,10 +199,11 @@ Text:
         response = client.chat.completions.create(
             model="gpt-4.1-mini",
             messages=[
-                {"role": "system", "content": "You improve communication."},
+                {"role": "system", "content": SYSTEM_PROMPT},
                 {"role": "user", "content": prompt}
             ],
-            temperature=0.7
+            temperature=0.45,
+            max_completion_tokens=500
         )
     except HTTPException:
         raise
