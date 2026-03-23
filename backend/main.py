@@ -125,20 +125,62 @@ def get_openai_client() -> OpenAI:
 
 
 def extract_versions(content: str) -> list[dict[str, str]]:
+    cleaned_content = content.strip()
+
+    if cleaned_content.startswith("```"):
+        lines = cleaned_content.splitlines()
+        if len(lines) >= 3:
+            cleaned_content = "\n".join(lines[1:-1]).strip()
+
     try:
-        payload = json.loads(content)
-    except json.JSONDecodeError as exc:
-        raise HTTPException(status_code=502, detail="The AI service returned an invalid response format.") from exc
+        payload = json.loads(cleaned_content)
+    except json.JSONDecodeError:
+        json_start = cleaned_content.find("{")
+        json_end = cleaned_content.rfind("}")
+        if json_start != -1 and json_end != -1 and json_end > json_start:
+            try:
+                payload = json.loads(cleaned_content[json_start:json_end + 1])
+            except json.JSONDecodeError:
+                payload = None
+            if payload is not None:
+                versions = payload.get("versions")
+                if isinstance(versions, list) and len(versions) >= 2:
+                    cleaned_content = cleaned_content[json_start:json_end + 1]
+                else:
+                    payload = None
+        else:
+            payload = None
+
+        if payload is None:
+            cleaned = cleaned_content
+            if not cleaned:
+                raise HTTPException(status_code=502, detail="The AI service returned an empty response.")
+            return [
+                {"label": "Version A", "text": cleaned},
+                {"label": "Version B", "text": cleaned},
+            ]
 
     versions = payload.get("versions")
     if not isinstance(versions, list) or len(versions) < 2:
-        raise HTTPException(status_code=502, detail="The AI service did not return enough rewrite versions.")
+        cleaned = content.strip()
+        if not cleaned:
+            raise HTTPException(status_code=502, detail="The AI service returned an empty response.")
+        return [
+            {"label": "Version A", "text": cleaned},
+            {"label": "Version B", "text": cleaned},
+        ]
 
     normalized_versions = []
     for index, item in enumerate(versions[:2]):
         text = item.get("text") if isinstance(item, dict) else None
         if not isinstance(text, str) or not text.strip():
-            raise HTTPException(status_code=502, detail="One of the rewrite versions was empty.")
+            cleaned = content.strip()
+            if not cleaned:
+                raise HTTPException(status_code=502, detail="One of the rewrite versions was empty.")
+            return [
+                {"label": "Version A", "text": cleaned},
+                {"label": "Version B", "text": cleaned},
+            ]
         label = item.get("label") if isinstance(item, dict) else None
         normalized_versions.append(
             {
