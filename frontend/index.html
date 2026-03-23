@@ -1,175 +1,1309 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="en">
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>QuantumAOI</title>
-
   <style>
-    body {
-      margin: 0;
-      font-family: 'Inter', Arial, sans-serif;
-      background: linear-gradient(135deg, #0f172a, #1e293b);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      color: white;
+    :root {
+      --bg: #07111f;
+      --bg-soft: #0d1830;
+      --panel: rgba(11, 19, 36, 0.7);
+      --panel-strong: rgba(15, 25, 46, 0.86);
+      --panel-soft: rgba(255, 255, 255, 0.04);
+      --line: rgba(255, 255, 255, 0.1);
+      --line-strong: rgba(142, 214, 255, 0.22);
+      --text: #ecf4ff;
+      --muted: #9cb0cb;
+      --soft: #7f94b2;
+      --primary: #69b7ff;
+      --primary-2: #7ef0d6;
+      --primary-3: #8d8bff;
+      --success: #6af0bf;
+      --danger: #ff9aa9;
+      --shadow: 0 30px 80px rgba(0, 0, 0, 0.35);
+      --radius-xl: 32px;
+      --radius-lg: 24px;
+      --radius-md: 18px;
+      --radius-sm: 14px;
+      --ease: 220ms ease;
     }
 
-    .container {
-      width: 700px;
-      padding: 30px;
-      border-radius: 16px;
-      background: rgba(255, 255, 255, 0.05);
-      backdrop-filter: blur(15px);
-      box-shadow: 0 8px 40px rgba(0,0,0,0.4);
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Inter, "Segoe UI", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 15% 18%, rgba(105, 183, 255, 0.24), transparent 20%),
+        radial-gradient(circle at 85% 20%, rgba(126, 240, 214, 0.16), transparent 18%),
+        radial-gradient(circle at 70% 75%, rgba(141, 139, 255, 0.14), transparent 22%),
+        linear-gradient(180deg, #050b16 0%, #081223 42%, #07111f 100%);
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+      background-size: 72px 72px;
+      mask-image: radial-gradient(circle at center, black 35%, transparent 88%);
+      pointer-events: none;
+      opacity: 0.38;
+    }
+
+    .page {
+      position: relative;
+      z-index: 1;
+      width: min(1240px, calc(100% - 32px));
+      margin: 24px auto;
+    }
+
+    .shell {
+      position: relative;
+      overflow: hidden;
+      padding: 18px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 36px;
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.03)),
+        rgba(8, 14, 26, 0.76);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(28px);
+      -webkit-backdrop-filter: blur(28px);
+    }
+
+    .shell::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(circle at top left, rgba(105, 183, 255, 0.12), transparent 24%),
+        radial-gradient(circle at bottom right, rgba(126, 240, 214, 0.1), transparent 24%);
+      pointer-events: none;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 10px 12px 18px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .brand-badge {
+      position: relative;
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      background:
+        linear-gradient(135deg, rgba(105, 183, 255, 0.22), rgba(126, 240, 214, 0.16));
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.12),
+        0 12px 24px rgba(0, 0, 0, 0.2);
+    }
+
+    .brand-badge::before,
+    .brand-badge::after {
+      content: "";
+      position: absolute;
+      border-radius: 999px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-2));
+    }
+
+    .brand-badge::before {
+      inset: 10px 20px 10px 10px;
+      opacity: 0.95;
+    }
+
+    .brand-badge::after {
+      inset: 16px 10px 16px 24px;
+      opacity: 0.85;
+    }
+
+    .brand-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .brand-name {
+      font-size: 1.05rem;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+    }
+
+    .brand-name span {
+      background: linear-gradient(135deg, #b7e3ff 0%, #7ef0d6 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .brand-tagline {
+      color: var(--muted);
+      font-size: 0.84rem;
+    }
+
+    .topbar-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 16px;
+      border-radius: 999px;
+      color: var(--muted);
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.09);
+      font-size: 0.88rem;
+    }
+
+    .topbar-chip::before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--primary-2);
+      box-shadow: 0 0 0 8px rgba(126, 240, 214, 0.12);
+    }
+
+    .workspace {
+      display: grid;
+      grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+      gap: 18px;
+    }
+
+    .panel {
+      position: relative;
+      overflow: hidden;
+      border-radius: var(--radius-xl);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.025)),
+        var(--panel);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+    }
+
+    .panel::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), transparent 22%);
+      pointer-events: none;
+    }
+
+    .composer {
+      padding: 28px;
+    }
+
+    .output-panel {
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      min-height: 760px;
+    }
+
+    .hero-kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      color: #b5cae6;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+    }
+
+    .hero-kicker::before {
+      content: "";
+      width: 28px;
+      height: 1px;
+      background: linear-gradient(90deg, var(--primary), var(--primary-2));
     }
 
     h1 {
-      margin-bottom: 5px;
-      font-weight: 600;
+      margin: 18px 0 14px;
+      max-width: 11ch;
+      font-size: clamp(2.6rem, 5vw, 5.2rem);
+      line-height: 0.92;
+      letter-spacing: -0.07em;
+      font-weight: 720;
+    }
+
+    .brand-glow {
+      background: linear-gradient(135deg, #d7ecff 0%, #75c7ff 42%, #7ef0d6 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      text-shadow: 0 0 24px rgba(105, 183, 255, 0.12);
     }
 
     .subtitle {
-      margin-top: 0;
-      margin-bottom: 20px;
-      color: #94a3b8;
+      max-width: 58ch;
+      margin: 0 0 24px;
+      color: var(--muted);
+      font-size: 1rem;
+      line-height: 1.7;
+    }
+
+    .signal-row {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 22px;
+    }
+
+    .signal-card {
+      padding: 16px;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.035);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      min-height: 108px;
+      transition: transform var(--ease), border-color var(--ease), background var(--ease);
+    }
+
+    .signal-card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(126, 240, 214, 0.16);
+      background: rgba(255, 255, 255, 0.055);
+    }
+
+    .signal-card strong {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 0.96rem;
+      color: #f2f7ff;
+    }
+
+    .signal-card span {
+      color: var(--soft);
+      font-size: 0.9rem;
+      line-height: 1.55;
+    }
+
+    .compose-card {
+      padding: 16px;
+      border-radius: 24px;
+      background: rgba(255, 255, 255, 0.035);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .guide-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin: 0 0 18px;
+    }
+
+    .guide-card {
+      padding: 14px;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .guide-step {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      margin-bottom: 10px;
+      border-radius: 999px;
+      color: #04111d;
+      font-size: 0.82rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #b7e3ff 0%, #7ef0d6 100%);
+    }
+
+    .guide-card strong {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 0.95rem;
+      color: #f2f7ff;
+    }
+
+    .guide-card span {
+      color: var(--soft);
+      font-size: 0.88rem;
+      line-height: 1.55;
+    }
+
+    .field-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .field-header label,
+    .control label {
+      color: #f3f8ff;
+      font-size: 0.92rem;
+      font-weight: 600;
+    }
+
+    .field-note {
+      color: var(--soft);
+      font-size: 0.82rem;
+    }
+
+    .textarea-help {
+      margin-top: 10px;
+      color: var(--soft);
+      font-size: 0.88rem;
+      line-height: 1.6;
+    }
+
+    .examples {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .example-chip {
+      padding: 10px 12px;
+      border-radius: 999px;
+      color: #dbebff;
+      font-size: 0.86rem;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    textarea,
+    select,
+    button {
+      font: inherit;
+    }
+
+    textarea,
+    select {
+      width: 100%;
+      border: 1px solid transparent;
+      outline: none;
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.055);
+      transition:
+        border-color var(--ease),
+        box-shadow var(--ease),
+        background var(--ease),
+        transform var(--ease);
     }
 
     textarea {
-      width: 100%;
-      padding: 14px;
-      border-radius: 10px;
-      border: none;
-      outline: none;
-      resize: none;
-      font-size: 14px;
-      background: rgba(255,255,255,0.08);
-      color: white;
+      min-height: 220px;
+      resize: vertical;
+      padding: 18px 18px 20px;
+      border-radius: 20px;
+      line-height: 1.7;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
     }
 
-    .row {
-      display: flex;
-      gap: 10px;
-      margin-top: 15px;
+    textarea::placeholder {
+      color: #7d91ae;
     }
 
     select {
-      flex: 1;
-      padding: 10px;
-      border-radius: 8px;
-      border: none;
-      background: rgba(255,255,255,0.08);
-      color: white;
+      appearance: none;
+      -webkit-appearance: none;
+      padding: 15px 46px 15px 15px;
+      border-radius: 16px;
+      cursor: pointer;
+      background-image:
+        linear-gradient(45deg, transparent 50%, #9cb0cb 50%),
+        linear-gradient(135deg, #9cb0cb 50%, transparent 50%);
+      background-position:
+        calc(100% - 22px) calc(50% - 2px),
+        calc(100% - 16px) calc(50% - 2px);
+      background-size: 6px 6px, 6px 6px;
+      background-repeat: no-repeat;
+    }
+
+    textarea:focus,
+    select:focus {
+      transform: translateY(-1px);
+      border-color: rgba(105, 183, 255, 0.25);
+      background: rgba(255, 255, 255, 0.075);
+      box-shadow:
+        0 0 0 5px rgba(105, 183, 255, 0.08),
+        0 14px 40px rgba(0, 0, 0, 0.22);
+    }
+
+    button:focus-visible,
+    textarea:focus-visible,
+    select:focus-visible {
+      outline: 3px solid rgba(126, 240, 214, 0.65);
+      outline-offset: 3px;
+    }
+
+    .controls {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .control {
+      padding: 14px;
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.025);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 14px;
+      flex-wrap: wrap;
     }
 
     button {
-      padding: 12px 20px;
-      border-radius: 10px;
-      border: none;
-      background: linear-gradient(135deg, #6366f1, #8b5cf6);
-      color: white;
-      font-weight: 500;
+      border: 0;
       cursor: pointer;
-      transition: all 0.3s ease;
+      transition:
+        transform var(--ease),
+        box-shadow var(--ease),
+        opacity var(--ease),
+        background var(--ease),
+        color var(--ease),
+        border-color var(--ease);
     }
 
-    button:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(99,102,241,0.4);
+    .primary-btn {
+      position: relative;
+      overflow: hidden;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      min-width: 190px;
+      padding: 16px 22px;
+      border-radius: 18px;
+      color: #03101d;
+      font-weight: 700;
+      background: linear-gradient(135deg, #b7e3ff 0%, #7dbfff 35%, #7ef0d6 100%);
+      box-shadow:
+        0 20px 45px rgba(88, 188, 255, 0.22),
+        inset 0 1px 0 rgba(255, 255, 255, 0.52);
+    }
+
+    .primary-btn::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.42), transparent);
+      transform: translateX(-100%);
+      transition: transform 600ms ease;
+    }
+
+    .primary-btn:hover:not(:disabled) {
+      transform: translateY(-2px) scale(1.01);
+      box-shadow:
+        0 28px 60px rgba(88, 188, 255, 0.26),
+        0 0 0 8px rgba(105, 183, 255, 0.08);
+    }
+
+    .primary-btn:hover:not(:disabled)::before {
+      transform: translateX(100%);
+    }
+
+    .ghost-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 14px 16px;
+      border-radius: 16px;
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .ghost-btn:hover:not(:disabled) {
+      transform: translateY(-1px);
+      background: rgba(255, 255, 255, 0.08);
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.18);
+    }
+
+    .secondary-btn {
+      color: var(--muted);
+    }
+
+    .muted-btn {
+      color: #dce9fb;
+    }
+
+    .control-note {
+      display: block;
+      margin-top: 8px;
+      color: var(--soft);
+      font-size: 0.8rem;
+      line-height: 1.5;
+    }
+
+    button:disabled,
+    select:disabled,
+    textarea:disabled {
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+
+    .status-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 16px;
+      color: var(--soft);
+      font-size: 0.88rem;
+    }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      min-height: 44px;
+      padding: 10px 14px;
+      border-radius: 999px;
+      color: #dce9fb;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .spinner {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      border: 2px solid rgba(126, 240, 214, 0.18);
+      border-top-color: var(--primary-2);
+      animation: spin 750ms linear infinite;
+      display: none;
+    }
+
+    .status-pill.loading .spinner {
+      display: inline-block;
+    }
+
+    .status-pill.loading .status-text {
+      color: var(--primary-2);
+    }
+
+    .output-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 8px;
+    }
+
+    .output-title {
+      margin: 0 0 6px;
+      font-size: 1.15rem;
+      font-weight: 650;
+      letter-spacing: -0.03em;
+    }
+
+    .output-subtitle {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.55;
+      font-size: 0.92rem;
+    }
+
+    .output-meta {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .meta-card {
+      padding: 14px;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .meta-card .label {
+      display: block;
+      margin-bottom: 6px;
+      color: var(--soft);
+      font-size: 0.76rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .meta-card strong {
+      font-size: 0.96rem;
+      font-weight: 600;
+      color: #eff6ff;
+    }
+
+    .output-stage {
+      position: relative;
+      flex: 1;
+      display: flex;
+      min-height: 460px;
+      padding: 24px;
+      border-radius: 28px;
+      background:
+        radial-gradient(circle at top right, rgba(126, 240, 214, 0.08), transparent 22%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.02)),
+        var(--panel-strong);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+      overflow: hidden;
+    }
+
+    .output-empty-state {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      max-width: 460px;
+    }
+
+    .output-empty-state strong {
+      font-size: 1.08rem;
+      color: #eef6ff;
+    }
+
+    .output-empty-state span {
+      color: var(--soft);
+      line-height: 1.7;
+      font-size: 0.95rem;
+    }
+
+    .output-hints {
+      display: grid;
+      gap: 10px;
+      margin-top: 4px;
+    }
+
+    .output-hint {
+      padding: 12px 14px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.035);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: #dce9fb;
+      font-size: 0.9rem;
+    }
+
+    .output-stage::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(120deg, rgba(105, 183, 255, 0.08), transparent 34%),
+        linear-gradient(300deg, rgba(141, 139, 255, 0.08), transparent 30%);
+      pointer-events: none;
     }
 
     .output {
-      margin-top: 20px;
-      padding: 15px;
-      border-radius: 12px;
-      background: rgba(255,255,255,0.06);
-      min-height: 120px;
+      position: relative;
+      width: 100%;
+      margin: 0;
+      color: #ecf4ff;
+      line-height: 1.82;
+      font-size: 1rem;
       white-space: pre-wrap;
-      color: #e2e8f0;
-      border: 1px solid rgba(255,255,255,0.08);
     }
 
-    .copy-btn {
-      margin-top: 10px;
-      background: transparent;
-      border: 1px solid rgba(255,255,255,0.2);
+    .output.placeholder {
+      color: #8ca2c0;
     }
 
-    .copy-btn:hover {
-      background: rgba(255,255,255,0.1);
+    .output.typing::after {
+      content: "";
+      display: inline-block;
+      width: 8px;
+      height: 1.05em;
+      margin-left: 4px;
+      vertical-align: text-bottom;
+      border-radius: 999px;
+      background: linear-gradient(180deg, var(--primary), var(--primary-2));
+      animation: blink 900ms steps(1) infinite;
     }
 
+    .copy-btn.copied {
+      color: var(--success);
+      border-color: rgba(106, 240, 191, 0.24);
+      background: rgba(106, 240, 191, 0.08);
+    }
+
+    .foot-note {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      color: var(--soft);
+      font-size: 0.88rem;
+      padding: 0 8px;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    @keyframes blink {
+      50% {
+        opacity: 0;
+      }
+    }
+
+    @media (max-width: 1100px) {
+      .workspace {
+        grid-template-columns: 1fr;
+      }
+
+      .output-panel {
+        min-height: auto;
+      }
+
+      .output-stage {
+        min-height: 320px;
+      }
+    }
+
+    @media (max-width: 720px) {
+      .page {
+        width: min(100% - 16px, 100%);
+        margin: 12px auto;
+      }
+
+      .shell {
+        padding: 12px;
+        border-radius: 26px;
+      }
+
+      .topbar,
+      .output-head,
+      .status-row,
+      .foot-note,
+      .actions {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .composer,
+      .output-panel {
+        padding: 18px;
+      }
+
+      .signal-row,
+      .guide-grid,
+      .controls,
+      .output-meta {
+        grid-template-columns: 1fr;
+      }
+
+      .primary-btn,
+      .ghost-btn {
+        width: 100%;
+      }
+
+      h1 {
+        max-width: none;
+        font-size: 2.75rem;
+      }
+
+      textarea {
+        min-height: 180px;
+      }
+
+      .output-stage {
+        padding: 18px;
+      }
+    }
   </style>
-
 </head>
-
 <body>
+  <main class="page">
+    <section class="shell">
+      <header class="topbar">
+        <div class="brand">
+          <div class="brand-badge" aria-hidden="true"></div>
+          <div class="brand-meta">
+            <div class="brand-name"><span>QuantumAOI</span></div>
+            <div class="brand-tagline">Communication intelligence for modern work</div>
+          </div>
+        </div>
+        <div class="topbar-chip">Realtime rewrite engine</div>
+      </header>
 
-  <div class="container">
+      <section class="workspace">
+        <section class="panel composer">
+          <div class="hero-kicker">QuantumAOI Studio</div>
+          <h1><span class="brand-glow">QuantumAOI</span> shapes rough drafts into high-signal communication.</h1>
+          <p class="subtitle">
+            A sharper, more futuristic writing workspace for email, LinkedIn, job applications, and everyday messaging. Clean inputs, refined tone control, and output that feels ready to send.
+          </p>
 
-    <h1>QuantumAOI</h1>
-    <p class="subtitle">Rewrite your communication with confidence</p>
+          <div class="signal-row">
+            <article class="signal-card">
+              <strong>Tone precision</strong>
+              <span>Dial in confident, professional language without losing your voice.</span>
+            </article>
+            <article class="signal-card">
+              <strong>Context aware</strong>
+              <span>Adapt the same draft for outreach, hiring, networking, or direct messaging.</span>
+            </article>
+            <article class="signal-card">
+              <strong>Instantly usable</strong>
+              <span>Read, copy, and ship a cleaner version in a single focused flow.</span>
+            </article>
+          </div>
 
-    <textarea id="inputText" rows="5" placeholder="Paste your message..."></textarea>
+          <div class="guide-grid">
+            <article class="guide-card">
+              <span class="guide-step">1</span>
+              <strong>Paste your draft</strong>
+              <span>Drop in anything from a short message to a full paragraph. It does not need to be perfect.</span>
+            </article>
+            <article class="guide-card">
+              <span class="guide-step">2</span>
+              <strong>Choose context and tone</strong>
+              <span>Pick where the message will be used and how you want it to sound.</span>
+            </article>
+            <article class="guide-card">
+              <span class="guide-step">3</span>
+              <strong>Review and copy</strong>
+              <span>Read the improved version on the right, then copy it when it feels ready.</span>
+            </article>
+          </div>
 
-    <div class="row">
-      <select id="context">
-        <option>Email</option>
-        <option>LinkedIn</option>
-        <option>Job Application</option>
-        <option>Message</option>
-      </select>
+          <div class="compose-card">
+            <div class="field-header">
+              <label for="inputText">Your draft</label>
+              <span class="field-note">Paste the raw version. QuantumAOI handles the polish.</span>
+            </div>
 
-      <select id="tone">
-        <option>Professional</option>
-        <option>Confident</option>
-        <option>Polite</option>
-      </select>
+            <textarea id="inputText" aria-describedby="draftHelp" placeholder="Paste or type your draft here. Example: 'Hi Adviti, just following up on my application and wanted to check if there are any updates.'"></textarea>
+            <div id="draftHelp" class="textarea-help">
+              Tip: short, rough, and informal drafts work well. QuantumAOI can help make them clearer and more polished.
+            </div>
 
-      <button onclick="rewriteText()">Rewrite</button>
-    </div>
+            <div class="examples" aria-label="Example drafts">
+              <button class="ghost-btn example-chip" type="button" onclick="loadExample('followUp')">Example: Follow-up</button>
+              <button class="ghost-btn example-chip" type="button" onclick="loadExample('linkedin')">Example: LinkedIn note</button>
+              <button class="ghost-btn example-chip" type="button" onclick="loadExample('team')">Example: Team update</button>
+            </div>
 
-    <div class="output" id="output">
-      Your improved message will appear here...
-    </div>
+            <div class="controls">
+              <div class="control">
+                <label for="context">Context</label>
+                <select id="context">
+                  <optgroup label="Work">
+                    <option>Email</option>
+                    <option>Slack</option>
+                    <option>Team Update</option>
+                    <option>Presentation Intro</option>
+                  </optgroup>
+                  <optgroup label="Career">
+                    <option>LinkedIn</option>
+                    <option>Job Application</option>
+                    <option>Recruiter Reply</option>
+                    <option>Networking</option>
+                    <option>Cold Outreach</option>
+                    <option>Follow-up</option>
+                  </optgroup>
+                  <optgroup label="Everyday">
+                    <option>Message</option>
+                    <option>WhatsApp</option>
+                    <option>Instagram DM</option>
+                  </optgroup>
+                </select>
+                <span class="control-note">Choose where you plan to use the message.</span>
+              </div>
 
-    <button class="copy-btn" onclick="copyText()">Copy</button>
+              <div class="control">
+                <label for="tone">Tone</label>
+                <select id="tone">
+                  <optgroup label="Clear and formal">
+                    <option>Professional</option>
+                    <option>Polite</option>
+                    <option>Executive</option>
+                    <option>Diplomatic</option>
+                    <option>Direct</option>
+                    <option>Crisp</option>
+                  </optgroup>
+                  <optgroup label="Warm and natural">
+                    <option>Confident</option>
+                    <option>Friendly</option>
+                    <option>Warm</option>
+                    <option>Conversational</option>
+                    <option>Human</option>
+                    <option>Casual</option>
+                  </optgroup>
+                  <optgroup label="Modern and playful">
+                    <option>Persuasive</option>
+                    <option>Playful</option>
+                    <option>Cheeky</option>
+                    <option>Modern Casual</option>
+                    <option>Futuristic</option>
+                  </optgroup>
+                </select>
+                <span class="control-note">Pick the feeling you want the final message to give.</span>
+              </div>
+            </div>
 
-  </div>
+            <div class="actions">
+              <button id="rewriteBtn" class="primary-btn" type="button" onclick="rewriteText()">
+                <span id="rewriteBtnLabel">Generate Rewrite</span>
+              </button>
+              <button id="regenerateBtn" class="ghost-btn muted-btn" type="button" onclick="regenerateText()" disabled>Regenerate</button>
+              <button class="ghost-btn secondary-btn" type="button" onclick="clearDraft()">Clear Draft</button>
+            </div>
+
+            <div class="status-row">
+              <div id="statusPill" class="status-pill" aria-live="polite">
+                <span class="spinner" aria-hidden="true"></span>
+                <span id="statusText" class="status-text">QuantumAOI is ready.</span>
+              </div>
+              <span>Built for fast, polished communication.</span>
+            </div>
+          </div>
+        </section>
+
+        <aside class="panel output-panel">
+          <div class="output-head">
+            <div>
+              <h2 class="output-title">Refined Output</h2>
+              <p class="output-subtitle">Your rewritten message appears here with a live type-on reveal and a cleaner reading surface.</p>
+            </div>
+            <button id="copyBtn" class="ghost-btn copy-btn" type="button" onclick="copyText()">
+              Copy Output
+            </button>
+          </div>
+
+          <div class="output-meta">
+            <div class="meta-card">
+              <span class="label">Product</span>
+              <strong>QuantumAOI</strong>
+            </div>
+            <div class="meta-card">
+              <span class="label">Mode</span>
+              <strong>Professional Rewrite</strong>
+            </div>
+            <div class="meta-card">
+              <span class="label">Experience</span>
+              <strong>2026 SaaS UI</strong>
+            </div>
+          </div>
+
+          <div class="output-stage">
+            <div id="outputEmpty" class="output-empty-state">
+              <strong>Your improved message will appear here.</strong>
+              <span>When you click <em>Generate Rewrite</em>, QuantumAOI will show a clearer version on this panel and type it in live.</span>
+              <div class="output-hints">
+                <div class="output-hint">Helpful tip: use the example buttons if you want to try the app quickly.</div>
+                <div class="output-hint">You can still edit your draft and generate again until the wording feels right.</div>
+              </div>
+            </div>
+            <p id="output" class="output placeholder" aria-live="polite" hidden></p>
+          </div>
+
+          <div class="foot-note">
+            <span>Review, copy, and send when it feels right.</span>
+            <span>Fast interface. Premium tone. Clear output.</span>
+          </div>
+        </aside>
+      </section>
+    </section>
+  </main>
 
   <script>
-    async function rewriteText() {
-      const output = document.getElementById("output");
-      output.innerText = "Rewriting... ⏳";
+    const output = document.getElementById("output");
+    const inputText = document.getElementById("inputText");
+    const contextSelect = document.getElementById("context");
+    const toneSelect = document.getElementById("tone");
+    const rewriteBtn = document.getElementById("rewriteBtn");
+    const regenerateBtn = document.getElementById("regenerateBtn");
+    const rewriteBtnLabel = document.getElementById("rewriteBtnLabel");
+    const copyBtn = document.getElementById("copyBtn");
+    const clearBtn = document.querySelector(".secondary-btn");
+    const statusPill = document.getElementById("statusPill");
+    const statusText = document.getElementById("statusText");
+    const outputEmpty = document.getElementById("outputEmpty");
+    const API_BASE_URL = "https://quantumaoi-backend.onrender.com";
+    const REQUEST_TIMEOUT_MS = 20000;
+    const STATUS_MESSAGES = {
+      ready: "QuantumAOI is ready.",
+      loading: "QuantumAOI is refining your message...",
+      emptyDraft: "Waiting for your draft.",
+      loadedExample: "Example draft loaded.",
+      cleared: "Draft cleared. Paste or type a new message.",
+      complete: "QuantumAOI rewrite complete.",
+      copied: "Copied to clipboard.",
+      clipboardFailed: "Clipboard access failed.",
+      requestFailed: "Request failed.",
+      timeout: "The request took too long. Please try again.",
+      staleRequest: "A newer rewrite replaced the previous one."
+    };
+    const UI_MESSAGES = {
+      emptyDraft: "Add a draft first so QuantumAOI has something meaningful to refine.",
+      loading: "QuantumAOI is restructuring your message for clearer, stronger communication...",
+      emptyResponse: "No rewritten text was returned.",
+      genericError: "Something went wrong while rewriting. Please try again in a moment."
+    };
 
-      const text = document.getElementById("inputText").value;
-      const context = document.getElementById("context").value;
-      const tone = document.getElementById("tone").value;
+    let typingTimer = null;
+    let currentRequestController = null;
+    let requestSequence = 0;
+    let lastAbortReason = "";
+
+    const exampleDrafts = {
+      followUp: "Hi Sarah, just checking in on my application. I am still very interested in the role and would love to know if there are any updates when you have a moment.",
+      linkedin: "Hi Alex, I came across your profile and really liked your work in product design. I would love to connect and learn from your journey.",
+      team: "Hi team, sharing a quick update. I finished the first version of the draft and would appreciate your feedback before I send it out."
+    };
+
+    function setLoadingState(isLoading) {
+      rewriteBtn.disabled = isLoading;
+      inputText.disabled = isLoading;
+      contextSelect.disabled = isLoading;
+      toneSelect.disabled = isLoading;
+      copyBtn.disabled = isLoading;
+      regenerateBtn.disabled = isLoading || !inputText.value.trim();
+      clearBtn.disabled = isLoading;
+
+      rewriteBtnLabel.textContent = isLoading ? "Generating..." : "Generate Rewrite";
+      statusPill.classList.toggle("loading", isLoading);
+      statusText.textContent = isLoading
+        ? STATUS_MESSAGES.loading
+        : STATUS_MESSAGES.ready;
+    }
+
+    function updateActionState() {
+      const hasDraft = Boolean(inputText.value.trim());
+      regenerateBtn.disabled = !hasDraft || Boolean(currentRequestController);
+    }
+
+    function setOutputText(text, options = {}) {
+      const placeholder = options.placeholder || false;
+      const typing = options.typing || false;
+
+      output.textContent = text;
+      output.classList.toggle("placeholder", placeholder);
+      output.classList.toggle("typing", typing);
+      output.hidden = false;
+      outputEmpty.hidden = true;
+    }
+
+    function resetCopyState() {
+      copyBtn.classList.remove("copied");
+      copyBtn.textContent = "Copy Output";
+    }
+
+    function buildRequestPayload() {
+      return {
+        text: inputText.value.trim(),
+        context: contextSelect.value,
+        tone: toneSelect.value
+      };
+    }
+
+    function createTimeoutController(timeoutMs) {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => {
+        lastAbortReason = "timeout";
+        controller.abort("timeout");
+      }, timeoutMs);
+      return { controller, timeoutId };
+    }
+
+    async function requestRewrite(payload, requestId) {
+      if (currentRequestController) {
+        lastAbortReason = "superseded";
+        currentRequestController.abort("superseded");
+      }
+
+      const { controller, timeoutId } = createTimeoutController(REQUEST_TIMEOUT_MS);
+      currentRequestController = controller;
 
       try {
-        const response = await fetch("https://quantumaoi-backend.onrender.com", {
+        const response = await fetch(`${API_BASE_URL}/rewrite`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json"
           },
-          body: JSON.stringify({ text, context, tone })
+          body: JSON.stringify(payload),
+          signal: controller.signal
         });
 
-        const data = await response.json();
-        output.innerText = data.rewritten_text;
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(errorData.detail || "Request failed");
+        }
 
-      } catch (error) {
-        output.innerText = "Something went wrong. Please try again.";
+        const data = await response.json();
+
+        if (requestId !== requestSequence) {
+          statusText.textContent = STATUS_MESSAGES.staleRequest;
+          return null;
+        }
+
+        return data.rewritten_text || UI_MESSAGES.emptyResponse;
+      } finally {
+        clearTimeout(timeoutId);
+        if (currentRequestController === controller) {
+          currentRequestController = null;
+        }
+        updateActionState();
       }
     }
 
-    function copyText() {
-      const text = document.getElementById("output").innerText;
-      navigator.clipboard.writeText(text);
-      alert("Copied to clipboard!");
+    function clearTypingAnimation() {
+      if (typingTimer) {
+        clearTimeout(typingTimer);
+        typingTimer = null;
+      }
+      output.classList.remove("typing");
     }
-  </script>
 
+    function typeText(text) {
+      clearTypingAnimation();
+      output.textContent = "";
+      output.classList.remove("placeholder");
+      output.classList.add("typing");
+
+      let index = 0;
+
+      const step = () => {
+        output.textContent = text.slice(0, index);
+        index += 1;
+
+        if (index <= text.length) {
+          const currentCharacter = text[index - 1];
+          const delay = currentCharacter === "\n" ? 12 : 13;
+          typingTimer = setTimeout(step, delay);
+        } else {
+          output.classList.remove("typing");
+          typingTimer = null;
+        }
+      };
+
+      step();
+    }
+
+    async function rewriteText() {
+      const payload = buildRequestPayload();
+
+      if (!payload.text) {
+        setOutputText(UI_MESSAGES.emptyDraft, { placeholder: true });
+        statusText.textContent = STATUS_MESSAGES.emptyDraft;
+        return;
+      }
+
+      requestSequence += 1;
+      const currentRequestId = requestSequence;
+      clearTypingAnimation();
+      resetCopyState();
+      setLoadingState(true);
+      setOutputText(UI_MESSAGES.loading, { placeholder: true });
+
+      try {
+        const rewritten = await requestRewrite(payload, currentRequestId);
+        if (!rewritten) {
+          return;
+        }
+        typeText(rewritten);
+        statusText.textContent = STATUS_MESSAGES.complete;
+      } catch (error) {
+        if (error.name === "AbortError") {
+          if (lastAbortReason === "timeout") {
+            setOutputText(UI_MESSAGES.genericError, { placeholder: true });
+            statusText.textContent = STATUS_MESSAGES.timeout;
+          }
+          lastAbortReason = "";
+          return;
+        }
+        setOutputText(error.message || UI_MESSAGES.genericError, { placeholder: true });
+        statusText.textContent = STATUS_MESSAGES.requestFailed;
+      } finally {
+        setLoadingState(false);
+      }
+    }
+
+    function regenerateText() {
+      rewriteText();
+    }
+
+    function loadExample(type) {
+      if (!exampleDrafts[type]) {
+        return;
+      }
+
+      inputText.value = exampleDrafts[type];
+      contextSelect.value = type === "linkedin" ? "LinkedIn" : type === "team" ? "Team Update" : "Follow-up";
+      toneSelect.value = type === "team" ? "Professional" : "Friendly";
+      inputText.focus();
+      statusText.textContent = STATUS_MESSAGES.loadedExample;
+      updateActionState();
+    }
+
+    function clearDraft() {
+      if (currentRequestController) {
+        lastAbortReason = "cleared";
+        currentRequestController.abort("cleared");
+        currentRequestController = null;
+      }
+      inputText.value = "";
+      clearTypingAnimation();
+      output.hidden = true;
+      outputEmpty.hidden = false;
+      output.textContent = "";
+      output.classList.remove("placeholder");
+      resetCopyState();
+      statusText.textContent = STATUS_MESSAGES.cleared;
+      inputText.focus();
+      updateActionState();
+    }
+
+    async function copyText() {
+      const text = output.textContent.trim();
+      if (!text || output.classList.contains("placeholder")) {
+        return;
+      }
+
+      try {
+        await navigator.clipboard.writeText(text);
+        copyBtn.classList.add("copied");
+        copyBtn.textContent = "Copied";
+        statusText.textContent = STATUS_MESSAGES.copied;
+      } catch (error) {
+        statusText.textContent = STATUS_MESSAGES.clipboardFailed;
+      }
+    }
+
+    inputText.addEventListener("input", updateActionState);
+    updateActionState();
+  </script>
 </body>
 </html>
