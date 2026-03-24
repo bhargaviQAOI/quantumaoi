@@ -64,6 +64,7 @@ STYLE_GUIDANCE = {
     "confident": "Push it slightly more assertive and decisive.",
     "short": "Make it tighter and more economical.",
     "friendly": "Make it warmer and more approachable.",
+    "technical": "Make it more precise, specific, and professionally technical while staying clear and readable.",
 }
 
 VOICE_GUIDANCE = (
@@ -100,6 +101,7 @@ ACTION_GUIDANCE = {
     "shorten": "Make it tighter, sharper, and more intentional rather than simply shorter.",
     "friendlier": "Make it warmer and easier to connect with while keeping it natural and unsentimental.",
     "stronger": "Make it more direct, confident, and intentional without sounding aggressive.",
+    "technical": "Increase precision and specificity, use professional terminology where it helps, and keep the message concise and clear.",
 }
 
 SYSTEM_PROMPT = """
@@ -133,7 +135,7 @@ OUTPUT: <final text>
 
 class RewriteRequest(BaseModel):
     text: str = Field(..., min_length=1, max_length=5000)
-    action: Optional[Literal["shorten", "friendlier", "stronger"]] = None
+    action: Optional[Literal["shorten", "friendlier", "stronger", "technical"]] = None
     previous_output: Optional[str] = Field(default=None, max_length=5000)
     context: Literal[
         "Email",
@@ -169,7 +171,7 @@ class RewriteRequest(BaseModel):
         "Modern Casual",
         "Futuristic",
     ] = "Professional"
-    style: Literal["default", "confident", "short", "friendly"] = "default"
+    style: Literal["default", "confident", "short", "friendly", "technical"] = "default"
 
     @field_validator("text", "previous_output")
     @classmethod
@@ -229,6 +231,7 @@ def normalize_action(action: Optional[str], style: str) -> Optional[str]:
         "short": "shorten",
         "friendly": "friendlier",
         "confident": "stronger",
+        "technical": "technical",
     }
     return style_to_action.get(style)
 
@@ -249,6 +252,8 @@ def build_quality_rules(message_type: str) -> str:
             "- Preserve meaning, but do not preserve weak phrasing.",
             "- Keep it concise and high-signal.",
             "- Replace weak phrasing with stronger alternatives when it improves the line.",
+            "- Use more precise and domain-appropriate terminology when the message is technical or work-related.",
+            "- Keep technical rewrites readable; do not add jargon just to sound smarter.",
             VARIATION_GUIDANCE,
             POLISH_GUIDANCE,
             ANTI_AI_GUIDANCE,

@@ -207,7 +207,8 @@
 
     .panel {
       position: relative;
-      overflow: hidden;
+      overflow-x: visible;
+      overflow-y: hidden;
       border-radius: var(--radius-xl);
       border: 1px solid var(--border);
       background:
@@ -297,6 +298,13 @@
       margin-top: 10px;
     }
 
+    .technical-hint {
+      margin-top: 8px;
+      color: rgba(214, 228, 245, 0.72);
+      font-size: 0.8rem;
+      line-height: 1.4;
+    }
+
     .tone-row {
       display: grid;
       gap: 8px;
@@ -383,6 +391,11 @@
       transition: opacity 260ms ease, transform 260ms ease;
     }
 
+    #outputSection {
+      scroll-margin-top: 16px;
+      scroll-margin-bottom: 96px;
+    }
+
     .output-panel.is-empty .output-shell {
       display: none;
     }
@@ -429,7 +442,8 @@
 
     .result-block {
       position: relative;
-      overflow: hidden;
+      overflow-x: visible;
+      overflow-y: hidden;
       padding: 18px;
       border-radius: 22px;
       background: rgba(255, 255, 255, 0.04);
@@ -527,6 +541,20 @@
       line-height: 1.45;
     }
 
+    .clarity-indicators {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 12px;
+      margin-top: 10px;
+      color: rgba(214, 228, 245, 0.72);
+      font-size: 0.78rem;
+      line-height: 1.4;
+    }
+
+    .clarity-indicators span {
+      white-space: nowrap;
+    }
+
     .result-meta,
     .result-tools {
       display: flex;
@@ -592,11 +620,23 @@
     .suggestion-row,
     .improve-actions {
       display: flex;
+      width: 100%;
+      max-width: 100%;
       gap: 10px;
       overflow-x: auto;
-      padding-bottom: 2px;
+      overflow-y: visible;
+      padding: 8px 16px 8px 16px;
+      margin: 0 -16px;
+      scroll-behavior: smooth;
+      -webkit-overflow-scrolling: touch;
       scrollbar-width: none;
       -ms-overflow-style: none;
+    }
+
+    .suggestion-row::after,
+    .improve-actions::after {
+      content: "";
+      flex: 0 0 16px;
     }
 
     .suggestion-row::-webkit-scrollbar,
@@ -606,6 +646,12 @@
 
     .mini-btn,
     .suggestion-chip {
+      flex: 0 0 auto;
+      white-space: nowrap;
+    }
+
+    .improve-actions button,
+    .suggestion-row button {
       flex: 0 0 auto;
       white-space: nowrap;
     }
@@ -822,7 +868,7 @@
           </div>
 
           <textarea id="inputText" placeholder="Paste your message..."></textarea>
-          <div class="input-hint">Try something like: ‘Hey, just following up on my application...’</div>
+          <div class="input-hint">Write your message in any way - we'll make it clear.</div>
 
           <div class="tone-row">
             <div class="tone-label">Tone</div>
@@ -839,7 +885,7 @@
         </div>
       </section>
 
-      <section id="outputPanel" class="panel output-panel is-empty">
+      <section id="outputSection" class="panel output-panel is-empty">
         <div class="section-inner">
           <div class="output-head">
             <div>
@@ -865,6 +911,11 @@
                   <span class="human-heading">✨ This sounds like you at your best</span>
                   <p id="output" class="result-copy emphasized" aria-live="polite"></p>
                   <div id="microFeedback" class="micro-feedback hidden"></div>
+                  <div id="clarityIndicators" class="clarity-indicators hidden">
+                    <span>✔ Clear</span>
+                    <span>✔ Polite</span>
+                    <span>✔ Easy to understand</span>
+                  </div>
                   <div class="result-meta">
                     <div id="confidenceLine" class="confidence-line hidden">✅ Sounds more natural and professional</div>
                     <button id="copyInlineBtn" class="ghost-btn inline-copy-btn hidden" type="button" onclick="copyText()">Copy</button>
@@ -883,6 +934,9 @@
                     <button class="mini-btn" type="button" onclick="improveAgain('short')">Shorter</button>
                     <button class="mini-btn" type="button" onclick="improveAgain('friendly')">Friendlier</button>
                     <button class="mini-btn" type="button" onclick="improveAgain('confident')">Stronger</button>
+                    <button class="mini-btn" type="button" onclick="improveAgain('technical')">Technical</button>
+                    <button class="mini-btn" type="button" onclick="improveAgain('simple')">Simple</button>
+                    <button class="mini-btn" type="button" onclick="improveAgain('polite')">Polite</button>
                   </div>
                   <div class="improve-hint">Refine it further.</div>
                 </div>
@@ -919,10 +973,12 @@
     const confidenceLine = document.getElementById("confidenceLine");
     const copyInlineBtn = document.getElementById("copyInlineBtn");
     const microFeedback = document.getElementById("microFeedback");
+    const clarityIndicators = document.getElementById("clarityIndicators");
     const variationBtn = document.getElementById("variationBtn");
     const loopbackLine = document.getElementById("loopbackLine");
     const suggestionRow = document.getElementById("suggestionRow");
-    const outputPanel = document.getElementById("outputPanel");
+    const outputSection = document.getElementById("outputSection");
+    const inputHint = document.querySelector(".input-hint");
 
     const API_BASE_URL = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
       ? "http://127.0.0.1:8000"
@@ -939,6 +995,8 @@
     let currentOutput = "";
     let lastSourceText = "";
     let variationIndex = 0;
+    const DEFAULT_INPUT_HINT = "Write your message in any way - we'll make it clear.";
+    const TECHNICAL_INPUT_HINT = "Write your message in any way - we'll make it clear.  💡 Make this more technical?";
 
     function setLoadingState(isLoading) {
       rewriteBtn.disabled = isLoading;
@@ -950,7 +1008,7 @@
     }
 
     function showResults() {
-      outputPanel.classList.remove("is-empty");
+      outputSection.classList.remove("is-empty");
       emptyState.classList.add("hidden");
       resultStack.classList.remove("hidden");
       requestAnimationFrame(() => {
@@ -964,7 +1022,7 @@
     }
 
     function showEmptyState() {
-      outputPanel.classList.add("is-empty");
+      outputSection.classList.add("is-empty");
       emptyState.classList.remove("hidden");
       resultStack.classList.add("hidden");
       resultStack.classList.remove("visible");
@@ -975,6 +1033,7 @@
       detectedLabel.classList.add("hidden");
       confidenceLine.classList.add("hidden");
       microFeedback.classList.add("hidden");
+      clarityIndicators.classList.add("hidden");
       loopbackLine.classList.add("hidden");
       suggestionRow.innerHTML = "";
     }
@@ -1018,6 +1077,19 @@
       setTimeout(() => {
         outputCard.classList.remove("flash");
       }, 340);
+    }
+
+    function scrollToOutput() {
+      if (!outputSection) {
+        return;
+      }
+
+      setTimeout(() => {
+        outputSection.scrollIntoView({
+          behavior: "smooth",
+          block: "start"
+        });
+      }, 160);
     }
 
     function animateImproveButton(button) {
@@ -1069,6 +1141,14 @@
 
     function normalizeWhitespace(text) {
       return text.replace(/\s+/g, " ").trim();
+    }
+
+    function looksTechnical(text) {
+      return /\b(api|bug|error|deploy|deployment|integration|sdk|database|backend|frontend|endpoint|latency|auth|incident|stack trace|exception|schema|query|payload|cache|infra|repository|pull request|merge|build|runtime)\b/i.test(text);
+    }
+
+    function updateInputHint(text) {
+      inputHint.textContent = looksTechnical(text) ? TECHNICAL_INPUT_HINT : DEFAULT_INPUT_HINT;
     }
 
     function polishRewrite(sourceText, rewrittenText) {
@@ -1191,12 +1271,22 @@
       if (style === "short") {
         feedbacks.push("Sharper, tighter phrasing");
       }
+      if (style === "technical") {
+        feedbacks.push("More precise and professional");
+      }
+      if (style === "simple") {
+        feedbacks.push("Easier to understand");
+      }
+      if (style === "polite" || tone === "Polite") {
+        feedbacks.push("More polite and respectful");
+      }
       if (!feedbacks.length) {
         feedbacks.push("Cleaner flow and stronger wording");
       }
 
       microFeedback.textContent = feedbacks.slice(0, 2).join(" • ");
       microFeedback.classList.remove("hidden");
+      clarityIndicators.classList.remove("hidden");
     }
 
     function getSuggestionConfigs(sourceText) {
@@ -1227,6 +1317,14 @@
         });
       }
 
+      if (looksTechnical(sourceText)) {
+        suggestions.push({
+          label: "Make it technical",
+          style: "technical",
+          tone: "Professional"
+        });
+      }
+
       if (!lower.includes("follow up") && !lower.includes("following up")) {
         suggestions.push({
           label: "Turn into follow-up",
@@ -1235,6 +1333,13 @@
           transformText: (text) => `Follow up on this message: ${text}`
         });
       }
+
+      suggestions.push({
+        label: "Make it simpler",
+        style: "short",
+        tone: "Polite",
+        feedbackStyle: "simple"
+      });
 
       return suggestions.slice(0, 2);
     }
@@ -1259,6 +1364,7 @@
     async function rewriteText(override = {}) {
       const sourceText = (override.text || inputText.value).trim();
       const style = override.style || DEFAULT_STYLE;
+      const feedbackStyle = override.feedbackStyle || style;
       const tone = override.tone || selectedTone;
       const context = override.context || DEFAULT_CONTEXT;
 
@@ -1280,6 +1386,7 @@
       confidenceLine.textContent = getConfidenceLine(tone);
       confidenceLine.classList.add("hidden");
       microFeedback.classList.add("hidden");
+      clarityIndicators.classList.add("hidden");
       output.textContent = "";
       afterCard.classList.add("shimmer");
       afterCard.classList.add("preparing");
@@ -1298,9 +1405,10 @@
           afterCard.classList.remove("preparing");
           typeText(polishedRewrite);
           confidenceLine.classList.remove("hidden");
-          setMicroFeedback(sourceText, polishedRewrite, tone, style);
+          setMicroFeedback(sourceText, polishedRewrite, tone, feedbackStyle);
           renderSuggestions(sourceText);
           triggerOutputFlash();
+          scrollToOutput();
         }, 180);
       } catch (error) {
         afterCard.classList.remove("shimmer");
@@ -1318,6 +1426,18 @@
       }
     }
 
+    function getImproveConfig(style) {
+      const configs = {
+        short: { style: "short", tone: selectedTone },
+        friendly: { style: "friendly", tone: "Friendly" },
+        confident: { style: "confident", tone: "Confident" },
+        technical: { style: "technical", tone: "Professional" },
+        simple: { style: "short", tone: "Polite" },
+        polite: { style: "default", tone: "Polite" }
+      };
+      return configs[style] || { style: DEFAULT_STYLE, tone: selectedTone };
+    }
+
     function improveAgain(style) {
       const sourceText = currentOutput || output.textContent.trim();
       if (!sourceText) {
@@ -1325,7 +1445,8 @@
       }
       const button = document.querySelector(`.mini-btn[onclick="improveAgain('${style}')"]`);
       animateImproveButton(button);
-      rewriteText({ text: sourceText, style });
+      const config = getImproveConfig(style);
+      rewriteText({ text: sourceText, style: config.style, tone: config.tone, feedbackStyle: style });
     }
 
     function tryAnotherVersion() {
@@ -1353,7 +1474,8 @@
         text: nextText,
         style: suggestion.style || DEFAULT_STYLE,
         tone: suggestion.tone || selectedTone,
-        context: suggestion.context || DEFAULT_CONTEXT
+        context: suggestion.context || DEFAULT_CONTEXT,
+        feedbackStyle: suggestion.feedbackStyle || suggestion.style || DEFAULT_STYLE
       });
     }
 
@@ -1401,8 +1523,13 @@
       }
     });
 
+    inputText.addEventListener("input", (e) => {
+      updateInputHint(e.target.value);
+    });
+
     window.onload = () => {
       inputText.focus();
+      updateInputHint(inputText.value);
       showEmptyState();
     };
   </script>
