@@ -2,27 +2,27 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>QuantumAOI</title>
   <style>
     :root {
-      --bg: #07101c;
-      --bg-2: #0c1728;
-      --panel: rgba(11, 20, 36, 0.9);
-      --panel-soft: rgba(255, 255, 255, 0.04);
-      --panel-strong: rgba(255, 255, 255, 0.06);
+      --bg: #07111f;
+      --panel: rgba(12, 20, 38, 0.82);
+      --panel-soft: rgba(255, 255, 255, 0.045);
       --border: rgba(255, 255, 255, 0.08);
-      --border-strong: rgba(126, 240, 214, 0.22);
-      --text: #edf5ff;
-      --muted: rgba(190, 207, 229, 0.72);
-      --soft: rgba(166, 184, 208, 0.8);
-      --primary: #76bbff;
+      --border-strong: rgba(105, 183, 255, 0.18);
+      --text: #ecf4ff;
+      --muted: #9cb0cb;
+      --soft: #7f94b2;
+      --soft-low: rgba(156, 176, 203, 0.76);
+      --primary: #69b7ff;
       --primary-2: #7ef0d6;
       --success: #6af0bf;
-      --shadow: 0 22px 60px rgba(0, 0, 0, 0.34);
-      --radius-xl: 28px;
+      --result-glow: rgba(126, 240, 214, 0.22);
+      --shadow: 0 30px 80px rgba(0, 0, 0, 0.35);
+      --radius-xl: 30px;
       --radius-lg: 22px;
-      --radius-md: 18px;
+      --radius-md: 16px;
       --ease: 220ms ease;
     }
 
@@ -30,21 +30,15 @@
       box-sizing: border-box;
     }
 
-    html,
     body {
       margin: 0;
-      min-height: 100%;
-      overflow-x: hidden;
-    }
-
-    body {
+      min-height: 100vh;
       font-family: Inter, "Segoe UI", sans-serif;
-      font-size: 16px;
       color: var(--text);
       background:
-        radial-gradient(circle at top, rgba(118, 187, 255, 0.18), transparent 28%),
-        radial-gradient(circle at 80% 12%, rgba(126, 240, 214, 0.14), transparent 22%),
-        linear-gradient(180deg, #040913 0%, #081120 50%, #07101c 100%);
+        radial-gradient(circle at 18% 18%, rgba(105, 183, 255, 0.2), transparent 22%),
+        radial-gradient(circle at 82% 14%, rgba(126, 240, 214, 0.14), transparent 20%),
+        linear-gradient(180deg, #050b16 0%, #081223 45%, #07111f 100%);
     }
 
     body::before {
@@ -52,61 +46,53 @@
       position: fixed;
       inset: 0;
       background-image:
-        linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
-      background-size: 70px 70px;
-      mask-image: radial-gradient(circle at center, black 35%, transparent 85%);
-      opacity: 0.32;
+        linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+      background-size: 72px 72px;
+      mask-image: radial-gradient(circle at center, black 35%, transparent 88%);
+      opacity: 0.35;
       pointer-events: none;
     }
 
-    button,
-    textarea {
-      font: inherit;
-    }
-
-    button {
-      border: 0;
-      cursor: pointer;
-    }
-
-    button:focus-visible,
-    textarea:focus-visible {
-      outline: 3px solid rgba(126, 240, 214, 0.7);
-      outline-offset: 3px;
-    }
-
-    .app-shell {
-      width: 100%;
-      max-width: 600px;
-      margin: 0 auto;
-      padding: 16px 16px calc(112px + env(safe-area-inset-bottom));
+    .page {
       position: relative;
       z-index: 1;
+      width: min(1100px, calc(100% - 28px));
+      margin: 24px auto;
+    }
+
+    .shell {
+      padding: 18px;
+      border-radius: 34px;
+      border: 1px solid var(--border);
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.03)),
+        rgba(8, 14, 26, 0.8);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(26px);
+      -webkit-backdrop-filter: blur(26px);
     }
 
     .topbar {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 12px;
-      margin-bottom: 18px;
+      gap: 16px;
+      padding: 10px 12px 24px;
     }
 
     .brand {
       display: flex;
       align-items: center;
-      gap: 12px;
-      min-width: 0;
+      gap: 14px;
     }
 
     .brand-badge {
       position: relative;
-      width: 42px;
-      height: 42px;
-      flex: 0 0 auto;
+      width: 44px;
+      height: 44px;
       border-radius: 14px;
-      background: linear-gradient(135deg, rgba(118, 187, 255, 0.24), rgba(126, 240, 214, 0.16));
+      background: linear-gradient(135deg, rgba(105, 183, 255, 0.22), rgba(126, 240, 214, 0.16));
       border: 1px solid rgba(255, 255, 255, 0.12);
       box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
     }
@@ -120,89 +106,45 @@
     }
 
     .brand-badge::before {
-      inset: 10px 19px 10px 10px;
+      inset: 10px 20px 10px 10px;
     }
 
     .brand-badge::after {
-      inset: 16px 10px 16px 23px;
+      inset: 16px 10px 16px 24px;
     }
 
     .brand-name {
-      font-size: 1rem;
+      font-size: 1.04rem;
       font-weight: 700;
       letter-spacing: -0.03em;
     }
 
     .brand-name span {
-      background: linear-gradient(135deg, #c8e9ff 0%, #8ff5df 100%);
+      background: linear-gradient(135deg, #b7e3ff 0%, #7ef0d6 100%);
       -webkit-background-clip: text;
       background-clip: text;
       color: transparent;
     }
 
     .brand-tagline {
-      margin-top: 2px;
       color: var(--muted);
-      font-size: 0.82rem;
-      line-height: 1.35;
+      font-size: 0.84rem;
+      margin-top: 2px;
     }
 
     .chip {
-      flex: 0 0 auto;
-      padding: 10px 12px;
-      border-radius: 999px;
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid var(--border);
-      color: var(--muted);
-      font-size: 0.78rem;
-      white-space: nowrap;
-    }
-
-    .hero {
-      margin-bottom: 18px;
-    }
-
-    .hero-kicker {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      padding: 8px 12px;
+      padding: 11px 14px;
       border-radius: 999px;
       background: rgba(255, 255, 255, 0.04);
       border: 1px solid var(--border);
-      color: #bdd3ee;
-      font-size: 0.76rem;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-    }
-
-    .hero-kicker::before {
-      content: "";
-      width: 24px;
-      height: 1px;
-      background: linear-gradient(90deg, var(--primary), var(--primary-2));
-    }
-
-    h1 {
-      margin: 14px 0 10px;
-      font-size: clamp(2.3rem, 8vw, 3.6rem);
-      line-height: 0.95;
-      letter-spacing: -0.06em;
-      font-weight: 760;
-      max-width: 10ch;
-    }
-
-    .subtitle {
-      margin: 0;
       color: var(--muted);
-      font-size: 0.98rem;
-      line-height: 1.6;
-      max-width: 34ch;
+      font-size: 0.84rem;
     }
 
-    .stack {
+    .workspace {
       display: grid;
-      gap: 16px;
+      grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+      gap: 20px;
     }
 
     .panel {
@@ -213,101 +155,164 @@
       background:
         linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02)),
         var(--panel);
-      box-shadow: var(--shadow);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
     }
 
     .panel::before {
       content: "";
       position: absolute;
       inset: 0;
-      background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), transparent 20%);
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), transparent 22%);
       pointer-events: none;
     }
 
-    .section-inner {
-      position: relative;
-      z-index: 1;
+    .composer,
+    .output-panel {
+      padding: 28px;
+    }
+
+    .hero-kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      color: #b5cae6;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border);
+      font-size: 0.78rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .hero-kicker::before {
+      content: "";
+      width: 28px;
+      height: 1px;
+      background: linear-gradient(90deg, var(--primary), var(--primary-2));
+    }
+
+    h1 {
+      margin: 18px 0 12px;
+      max-width: 10ch;
+      font-size: clamp(2.6rem, 5vw, 4.8rem);
+      line-height: 0.94;
+      letter-spacing: -0.07em;
+      font-weight: 720;
+    }
+
+    .subtitle {
+      max-width: 34ch;
+      margin: 0 0 26px;
+      color: var(--muted);
+      font-size: 0.96rem;
+      line-height: 1.55;
+    }
+
+    .compose-card,
+    .output-card {
+      border-radius: 24px;
+      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.035);
+    }
+
+    .compose-card {
       padding: 20px;
     }
 
-    .field-header,
-    .output-head {
+    .output-card {
+      padding: 20px;
+      transition: transform var(--ease), border-color var(--ease), box-shadow var(--ease);
+    }
+
+    .output-card.flash {
+      border-color: rgba(126, 240, 214, 0.34);
+      box-shadow:
+        0 0 0 1px rgba(126, 240, 214, 0.24),
+        0 0 34px rgba(126, 240, 214, 0.12),
+        0 18px 34px rgba(0, 0, 0, 0.18);
+      animation: successPulse 340ms ease;
+    }
+
+    .field-header {
       display: flex;
-      align-items: flex-start;
+      align-items: center;
       justify-content: space-between;
       gap: 12px;
       margin-bottom: 12px;
     }
 
-    .field-header label,
-    .output-title {
-      color: #f5faff;
-      font-size: 1rem;
-      font-weight: 700;
-      letter-spacing: -0.02em;
-      margin: 0;
+    .field-header label {
+      color: #f3f8ff;
+      font-size: 0.94rem;
+      font-weight: 600;
     }
 
-    .field-note,
-    .output-subtitle,
-    .speed-note,
-    .input-hint,
-    .trust-copy,
-    .differentiator,
-    .detected-label,
-    .refine-prompt,
-    .improve-hint,
-    .loopback-line {
-      color: var(--muted);
+    .field-note {
+      color: var(--soft);
       font-size: 0.84rem;
-      line-height: 1.45;
+    }
+
+    textarea,
+    button {
+      font: inherit;
     }
 
     textarea {
       width: 100%;
-      min-height: 120px;
-      padding: 16px;
+      min-height: 230px;
       resize: vertical;
+      padding: 18px 18px 20px;
       border-radius: 20px;
-      border: 1px solid rgba(118, 187, 255, 0.14);
-      background: rgba(255, 255, 255, 0.055);
+      border: 1px solid rgba(105, 183, 255, 0.15);
+      outline: none;
       color: var(--text);
-      font-size: 16px;
-      line-height: 1.7;
+      background: rgba(255, 255, 255, 0.055);
       box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+      line-height: 1.72;
+      font-size: 1rem;
       transition: border-color var(--ease), box-shadow var(--ease), background var(--ease), transform var(--ease);
     }
 
     textarea::placeholder {
-      color: #8094af;
+      color: #7d91ae;
     }
 
     textarea:focus {
       transform: translateY(-1px);
+      border-color: rgba(105, 183, 255, 0.25);
       background: rgba(255, 255, 255, 0.075);
-      border-color: rgba(118, 187, 255, 0.24);
       box-shadow:
-        0 0 0 5px rgba(118, 187, 255, 0.12),
-        0 18px 40px rgba(0, 0, 0, 0.2);
+        0 0 0 6px rgba(105, 183, 255, 0.12),
+        0 20px 50px rgba(0, 0, 0, 0.25);
+    }
+
+    button:focus-visible,
+    textarea:focus-visible {
+      outline: 3px solid rgba(126, 240, 214, 0.65);
+      outline-offset: 3px;
     }
 
     .input-hint {
-      margin-top: 10px;
+      margin-top: 12px;
+      color: var(--soft);
+      font-size: 0.86rem;
+      line-height: 1.45;
     }
 
     .tone-row {
       display: grid;
       gap: 8px;
       margin-top: 18px;
+      opacity: 0.9;
     }
 
     .tone-label {
       color: var(--soft);
-      font-size: 0.78rem;
-      font-weight: 700;
-      letter-spacing: 0.08em;
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
       text-transform: uppercase;
     }
 
@@ -317,50 +322,158 @@
       gap: 8px;
     }
 
-    .tone-chip,
-    .ghost-btn,
-    .mini-btn,
-    .suggestion-chip,
-    .variation-link {
-      position: relative;
-      overflow: hidden;
-      min-height: 44px;
+    .tone-chip {
+      padding: 8px 12px;
       border-radius: 999px;
       border: 1px solid var(--border);
-      background: rgba(255, 255, 255, 0.04);
-      color: var(--text);
-      padding: 10px 14px;
-      transition: transform var(--ease), background var(--ease), box-shadow var(--ease), border-color var(--ease), opacity var(--ease), color var(--ease);
+      background: rgba(255, 255, 255, 0.03);
+      color: rgba(223, 234, 249, 0.82);
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: transform var(--ease), background var(--ease), border-color var(--ease), box-shadow var(--ease), opacity var(--ease);
+      opacity: 0.8;
     }
 
-    .tone-chip {
-      font-size: 0.84rem;
-      color: rgba(232, 242, 255, 0.84);
-      opacity: 0.84;
-    }
-
-    .tone-chip:hover,
-    .ghost-btn:hover:not(:disabled),
-    .mini-btn:hover:not(:disabled),
-    .suggestion-chip:hover:not(:disabled),
-    .variation-link:hover:not(:disabled) {
+    .tone-chip:hover {
       transform: translateY(-1px);
-      background: rgba(255, 255, 255, 0.085);
-      box-shadow: 0 12px 26px rgba(0, 0, 0, 0.18);
+      opacity: 1;
+      background: rgba(255, 255, 255, 0.06);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.14);
     }
 
     .tone-chip.active {
       opacity: 1;
-      color: #f6fbff;
-      background: rgba(118, 187, 255, 0.1);
-      border-color: rgba(118, 187, 255, 0.22);
+      background: rgba(105, 183, 255, 0.08);
+      border-color: rgba(105, 183, 255, 0.22);
+      color: #f4fbff;
+    }
+
+    .primary-btn,
+    .ghost-btn,
+    .mini-btn {
+      border: 0;
+      cursor: pointer;
+      transition: transform var(--ease), box-shadow var(--ease), opacity var(--ease), background var(--ease), color var(--ease), border-color var(--ease);
+    }
+
+    .primary-btn {
+      position: relative;
+      overflow: hidden;
+      width: 100%;
+      margin-top: 22px;
+      padding: 17px 22px;
+      border-radius: 18px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      color: #03101d;
+      font-size: 1.05rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #b7e3ff 0%, #7dbfff 35%, #7ef0d6 100%);
+      box-shadow:
+        0 20px 45px rgba(88, 188, 255, 0.22),
+        inset 0 1px 0 rgba(255, 255, 255, 0.52);
+    }
+
+    .primary-btn::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.42), transparent);
+      transform: translateX(-100%);
+      transition: transform 600ms ease;
+    }
+
+    .primary-btn:hover:not(:disabled) {
+      transform: translateY(-2px) scale(1.01);
+      box-shadow:
+        0 28px 60px rgba(88, 188, 255, 0.26),
+        0 0 0 8px rgba(105, 183, 255, 0.08);
+    }
+
+    .primary-btn:hover:not(:disabled)::before {
+      transform: translateX(100%);
+    }
+
+    .primary-btn:active {
+      transform: scale(0.97);
+    }
+
+    .primary-btn .spinner {
+      display: inline-block;
+      width: 15px;
+      height: 15px;
+      border-radius: 50%;
+      border: 2px solid rgba(3, 16, 29, 0.18);
+      border-top-color: #03101d;
+      opacity: 0;
+      visibility: hidden;
+      transform: scale(0.8);
+      transition: opacity var(--ease), visibility var(--ease), transform var(--ease);
+    }
+
+    .primary-btn.loading .spinner {
+      opacity: 1;
+      visibility: visible;
+      transform: scale(1);
+      animation: spin 750ms linear infinite;
+    }
+
+    .trust-copy,
+    .differentiator {
+      margin-top: 12px;
+      color: var(--soft-low);
+      font-size: 0.8rem;
+      line-height: 1.45;
+    }
+
+    .differentiator {
+      margin-top: 6px;
+    }
+
+    .output-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 12px;
+    }
+
+    .output-title {
+      margin: 0 0 6px;
+      font-size: 1.28rem;
+      font-weight: 650;
+      letter-spacing: -0.03em;
+    }
+
+    .output-subtitle,
+    .speed-note,
+    .detected-label {
+      color: var(--soft-low);
+      font-size: 0.86rem;
+      line-height: 1.45;
+    }
+
+    .detected-label {
+      color: #bfd5f1;
+      margin-bottom: 10px;
     }
 
     .ghost-btn,
-    .suggestion-chip,
-    .variation-link {
-      font-size: 0.84rem;
-      font-weight: 600;
+    .mini-btn {
+      padding: 11px 14px;
+      border-radius: 14px;
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border);
+    }
+
+    .ghost-btn:hover:not(:disabled),
+    .mini-btn:hover:not(:disabled) {
+      transform: translateY(-1px);
+      background: rgba(255, 255, 255, 0.08);
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.18);
     }
 
     .ghost-btn.copied,
@@ -368,57 +481,33 @@
       color: var(--success);
       border-color: rgba(106, 240, 191, 0.24);
       background: rgba(106, 240, 191, 0.08);
-      transform: translateY(-1px) scale(1.02);
+      transform: translateY(-1px) scale(1.03);
     }
 
     .ghost-btn.ready,
     .inline-copy-btn.ready {
-      color: #def6eb;
+      color: #dff7ed;
       border-color: rgba(126, 240, 214, 0.18);
       background: rgba(126, 240, 214, 0.05);
-    }
-
-    .output-panel {
-      opacity: 1;
-      transition: opacity 260ms ease, transform 260ms ease;
-    }
-
-    .output-panel.is-empty .output-shell {
-      display: none;
-    }
-
-    .output-panel.is-empty .speed-note {
-      display: none;
+      opacity: 0.92;
     }
 
     .empty-state {
-      display: none;
-    }
-
-    .output-panel.is-empty .empty-state {
+      min-height: 360px;
       display: flex;
       align-items: center;
       justify-content: center;
-      min-height: 120px;
       text-align: center;
-      color: rgba(220, 233, 251, 0.84);
-      font-size: 0.96rem;
-      line-height: 1.55;
-      border-radius: 20px;
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px dashed rgba(255, 255, 255, 0.08);
-    }
-
-    .speed-note {
-      margin-top: -4px;
-      margin-bottom: 12px;
+      color: #dce9fb;
+      font-size: 1rem;
+      line-height: 1.5;
     }
 
     .result-stack {
       display: grid;
-      gap: 14px;
+      gap: 18px;
       opacity: 0;
-      transform: translateY(8px);
+      transform: translateY(10px);
       transition: opacity 260ms ease, transform 260ms ease;
     }
 
@@ -428,27 +517,26 @@
     }
 
     .result-block {
-      position: relative;
-      overflow: hidden;
-      padding: 18px;
+      padding: 20px;
       border-radius: 22px;
-      background: rgba(255, 255, 255, 0.04);
+      background: rgba(255, 255, 255, 0.045);
       border: 1px solid var(--border);
     }
 
     .result-block:first-child {
-      background: rgba(255, 255, 255, 0.028);
+      background: rgba(255, 255, 255, 0.03);
     }
 
     .result-block.primary {
-      border-color: var(--border-strong);
+      padding: 24px 24px 22px;
+      border-color: rgba(126, 240, 214, 0.24);
       background:
-        linear-gradient(180deg, rgba(126, 240, 214, 0.06), rgba(255, 255, 255, 0.04) 32%, rgba(255, 255, 255, 0.03)),
+        linear-gradient(180deg, rgba(126, 240, 214, 0.06), rgba(255, 255, 255, 0.035) 30%, rgba(255, 255, 255, 0.03)),
         rgba(255, 255, 255, 0.04);
       box-shadow:
-        inset 0 1px 0 rgba(255, 255, 255, 0.05),
-        0 0 0 1px rgba(126, 240, 214, 0.05),
-        0 18px 36px rgba(0, 0, 0, 0.16);
+        inset 0 1px 0 rgba(255, 255, 255, 0.06),
+        0 0 0 1px rgba(126, 240, 214, 0.06),
+        0 18px 34px rgba(0, 0, 0, 0.16);
     }
 
     .result-block.primary::after {
@@ -457,31 +545,39 @@
       inset: -1px;
       border-radius: inherit;
       background: radial-gradient(circle at top left, rgba(126, 240, 214, 0.14), transparent 34%);
+      opacity: 0.8;
       pointer-events: none;
+    }
+
+    .result-block.primary {
+      position: relative;
+      overflow: hidden;
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.04),
+        0 18px 34px rgba(0, 0, 0, 0.16);
     }
 
     .result-block.primary.preparing {
       box-shadow:
-        inset 0 1px 0 rgba(255, 255, 255, 0.06),
-        0 0 0 1px rgba(118, 187, 255, 0.18),
-        0 0 32px rgba(118, 187, 255, 0.14),
-        0 18px 36px rgba(0, 0, 0, 0.18);
+        inset 0 1px 0 rgba(255, 255, 255, 0.05),
+        0 0 0 1px rgba(105, 183, 255, 0.18),
+        0 0 34px rgba(105, 183, 255, 0.14),
+        0 18px 34px rgba(0, 0, 0, 0.16);
     }
 
     .result-label {
       display: block;
       margin-bottom: 8px;
-      color: rgba(160, 179, 205, 0.68);
-      font-size: 0.74rem;
-      font-weight: 700;
+      color: rgba(159, 178, 204, 0.66);
+      font-size: 0.76rem;
       text-transform: uppercase;
       letter-spacing: 0.1em;
     }
 
     .human-heading {
       display: block;
-      margin-bottom: 14px;
-      color: #f9fcff;
+      margin-bottom: 16px;
+      color: #f8fcff;
       font-size: 1rem;
       font-weight: 700;
       letter-spacing: -0.02em;
@@ -489,23 +585,82 @@
 
     .result-copy {
       margin: 0;
-      color: rgba(233, 243, 255, 0.76);
+      color: rgba(234, 243, 255, 0.78);
+      line-height: 1.8;
       font-size: 0.98rem;
-      line-height: 1.78;
       white-space: pre-wrap;
     }
 
     .result-copy.emphasized {
+      font-size: 1.18rem;
+      line-height: 1.96;
       color: #ffffff;
-      font-size: 1.14rem;
-      line-height: 1.9;
       letter-spacing: -0.015em;
       text-wrap: pretty;
-      text-shadow: 0 0 22px rgba(118, 187, 255, 0.08);
+      text-shadow: 0 0 24px rgba(105, 183, 255, 0.08);
     }
 
     .result-copy.reveal {
       animation: outputReveal 380ms cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+
+    .result-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+    .confidence-line {
+      color: #c9f8e7;
+      font-size: 0.84rem;
+      line-height: 1.45;
+    }
+
+    .micro-feedback {
+      margin-top: 10px;
+      color: rgba(201, 248, 231, 0.86);
+      font-size: 0.82rem;
+      line-height: 1.45;
+    }
+
+    .result-tools {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 16px;
+      flex-wrap: wrap;
+    }
+
+    .variation-link {
+      padding: 0;
+      border: 0;
+      background: transparent;
+      color: #d7e8ff;
+      font-size: 0.84rem;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      opacity: 0.88;
+    }
+
+    .variation-link:hover:not(:disabled) {
+      opacity: 1;
+      transform: translateY(-1px);
+      color: #f4fbff;
+    }
+
+    .variation-link.loading {
+      color: #f4fbff;
+      text-shadow: 0 0 18px rgba(126, 240, 214, 0.22);
+    }
+
+    .inline-copy-btn {
+      padding: 9px 12px;
+      border-radius: 12px;
+      font-size: 0.8rem;
+      white-space: nowrap;
     }
 
     .result-copy.typing::after {
@@ -520,58 +675,19 @@
       animation: blink 900ms steps(1) infinite;
     }
 
-    .micro-feedback {
-      margin-top: 10px;
-      color: rgba(201, 248, 231, 0.88);
-      font-size: 0.82rem;
-      line-height: 1.45;
-    }
-
-    .result-meta,
-    .result-tools {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      margin-top: 14px;
-      flex-wrap: wrap;
-    }
-
-    .confidence-line {
-      color: #c9f8e7;
-      font-size: 0.84rem;
-      line-height: 1.45;
-    }
-
-    .variation-link {
-      padding-inline: 0;
-      min-height: auto;
-      border: 0;
-      background: transparent;
-      color: #d6e8ff;
-      font-weight: 600;
-    }
-
-    .variation-link.loading {
-      color: #f5fbff;
-      text-shadow: 0 0 18px rgba(126, 240, 214, 0.22);
-    }
-
     .shimmer {
       position: relative;
       overflow: hidden;
       min-height: 110px;
     }
 
-    .shimmer::after,
-    .mini-btn.loading::after,
-    .suggestion-chip.loading::after {
+    .shimmer::after {
       content: "";
       position: absolute;
       inset: 0;
-      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.16), transparent);
       transform: translateX(-100%);
-      animation: shimmer 920ms linear infinite;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.12), transparent);
+      animation: shimmer 1000ms linear infinite;
     }
 
     .improve-section {
@@ -584,143 +700,134 @@
     }
 
     .improve-title {
-      font-size: 1rem;
+      font-size: 1.02rem;
       font-weight: 700;
-      color: #f6fbff;
+      color: #f7fbff;
     }
 
-    .suggestion-row,
+    .refine-prompt {
+      color: rgba(156, 176, 203, 0.78);
+      font-size: 0.82rem;
+      margin-bottom: 2px;
+    }
+
     .improve-actions {
       display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .suggestion-row {
+      display: flex;
+      flex-wrap: wrap;
       gap: 10px;
-      overflow-x: auto;
-      padding-bottom: 2px;
-      scrollbar-width: none;
-      -ms-overflow-style: none;
+      margin-top: 4px;
     }
 
-    .suggestion-row::-webkit-scrollbar,
-    .improve-actions::-webkit-scrollbar {
-      display: none;
-    }
-
-    .mini-btn,
     .suggestion-chip {
-      flex: 0 0 auto;
+      position: relative;
+      overflow: hidden;
+      padding: 9px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: rgba(255, 255, 255, 0.04);
+      color: rgba(236, 245, 255, 0.86);
+      font-size: 0.79rem;
+      font-weight: 600;
       white-space: nowrap;
     }
 
-    .mini-btn {
-      padding: 10px 16px;
-      font-size: 0.88rem;
-      font-weight: 600;
-      background: rgba(255, 255, 255, 0.06);
-      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    .suggestion-chip:hover:not(:disabled) {
+      transform: translateY(-1px);
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(126, 240, 214, 0.16);
+      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.16);
     }
 
-    .mini-btn:active:not(:disabled),
-    .mini-btn.pressing,
     .suggestion-chip:active:not(:disabled),
     .suggestion-chip.pressing {
       transform: scale(0.97);
     }
 
-    .mini-btn.loading,
     .suggestion-chip.loading {
-      border-color: rgba(118, 187, 255, 0.22);
+      border-color: rgba(105, 183, 255, 0.22);
       box-shadow:
-        0 0 0 1px rgba(118, 187, 255, 0.08),
-        0 0 18px rgba(118, 187, 255, 0.12);
+        0 0 0 1px rgba(105, 183, 255, 0.08),
+        0 0 18px rgba(105, 183, 255, 0.12);
     }
 
-    .cta-wrap {
-      position: fixed;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      z-index: 20;
-      padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
-      background: linear-gradient(180deg, rgba(7, 16, 28, 0), rgba(7, 16, 28, 0.88) 35%, rgba(7, 16, 28, 0.98));
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
-    }
-
-    .cta-inner {
-      max-width: 600px;
-      margin: 0 auto;
-    }
-
-    .primary-btn {
-      position: relative;
-      overflow: hidden;
-      width: 100%;
-      min-height: 56px;
-      padding: 16px 22px;
-      border-radius: 18px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      color: #04111f;
-      font-size: 1.02rem;
-      font-weight: 800;
-      background: linear-gradient(135deg, #c2e7ff 0%, #7dbcff 35%, #7ef0d6 100%);
-      box-shadow:
-        0 18px 40px rgba(88, 188, 255, 0.22),
-        inset 0 1px 0 rgba(255, 255, 255, 0.5);
-    }
-
-    .primary-btn::before {
+    .suggestion-chip.loading::after {
       content: "";
       position: absolute;
       inset: 0;
-      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.38), transparent);
-      transform: translateX(-100%);
-      transition: transform 600ms ease;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.16), transparent);
+      animation: shimmer 900ms linear infinite;
     }
 
-    .primary-btn:hover:not(:disabled) {
+    .improve-hint {
+      color: rgba(156, 176, 203, 0.76);
+      font-size: 0.82rem;
+    }
+
+    .loopback-line {
+      color: rgba(156, 176, 203, 0.72);
+      font-size: 0.8rem;
+      line-height: 1.45;
+    }
+
+    .mini-btn {
+      position: relative;
+      overflow: hidden;
+      padding: 13px 16px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.065);
+      border-color: rgba(255, 255, 255, 0.1);
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: #edf5ff;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    }
+
+    .mini-btn::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(120deg, transparent, rgba(255, 255, 255, 0.14), transparent);
+      transform: translateX(-120%);
+      transition: transform 500ms ease;
+    }
+
+    .mini-btn:hover:not(:disabled) {
       transform: translateY(-2px);
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(126, 240, 214, 0.18);
       box-shadow:
-        0 24px 52px rgba(88, 188, 255, 0.26),
-        0 0 0 8px rgba(118, 187, 255, 0.08);
+        0 14px 28px rgba(0, 0, 0, 0.18),
+        0 0 0 1px rgba(126, 240, 214, 0.08);
     }
 
-    .primary-btn:hover:not(:disabled)::before {
-      transform: translateX(100%);
+    .mini-btn:hover:not(:disabled)::before {
+      transform: translateX(120%);
     }
 
-    .primary-btn:active:not(:disabled) {
-      transform: scale(0.98);
+    .mini-btn:active:not(:disabled),
+    .mini-btn.pressing {
+      transform: translateY(0) scale(0.97);
     }
 
-    .primary-btn .spinner {
-      display: inline-block;
-      width: 15px;
-      height: 15px;
-      border-radius: 50%;
-      border: 2px solid rgba(4, 17, 31, 0.18);
-      border-top-color: #04111f;
-      opacity: 0;
-      visibility: hidden;
-      transform: scale(0.8);
-      transition: opacity var(--ease), visibility var(--ease), transform var(--ease);
-    }
-
-    .primary-btn.loading .spinner {
-      opacity: 1;
-      visibility: visible;
-      transform: scale(1);
-      animation: spin 750ms linear infinite;
-    }
-
-    .output-card.flash {
-      border-color: rgba(126, 240, 214, 0.34);
+    .mini-btn.loading {
+      border-color: rgba(105, 183, 255, 0.22);
       box-shadow:
-        0 0 0 1px rgba(126, 240, 214, 0.22),
-        0 0 34px rgba(126, 240, 214, 0.1),
-        0 18px 34px rgba(0, 0, 0, 0.18);
-      animation: successPulse 340ms ease;
+        0 0 0 1px rgba(105, 183, 255, 0.1),
+        0 0 20px rgba(105, 183, 255, 0.14);
+    }
+
+    .mini-btn.loading::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.18), transparent);
+      animation: shimmer 900ms linear infinite;
     }
 
     .hidden {
@@ -748,13 +855,13 @@
     @keyframes successPulse {
       0% {
         box-shadow:
-          0 0 0 0 rgba(126, 240, 214, 0.26),
-          0 0 0 0 rgba(118, 187, 255, 0.16);
+          0 0 0 0 rgba(126, 240, 214, 0.28),
+          0 0 0 0 rgba(105, 183, 255, 0.2);
       }
       100% {
         box-shadow:
           0 0 0 14px rgba(126, 240, 214, 0),
-          0 0 0 24px rgba(118, 187, 255, 0);
+          0 0 0 24px rgba(105, 183, 255, 0);
       }
     }
 
@@ -769,78 +876,118 @@
       }
     }
 
-    @media (min-width: 768px) {
-      .app-shell {
-        padding: 24px 20px calc(116px + env(safe-area-inset-bottom));
-      }
-
-      .section-inner {
-        padding: 24px;
-      }
-
-      h1 {
-        max-width: 12ch;
-      }
-
-      .result-copy.emphasized {
-        font-size: 1.18rem;
+    @media (max-width: 980px) {
+      .workspace {
+        grid-template-columns: 1fr;
       }
     }
 
-    @media (min-width: 1024px) {
-      .app-shell {
-        max-width: 600px;
+    @media (max-width: 720px) {
+      .page {
+        width: min(100% - 16px, 100%);
+        margin: 12px auto;
+      }
+
+      .shell {
+        padding: 12px;
+        border-radius: 26px;
+      }
+
+      .topbar,
+      .output-head {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .composer,
+      .output-panel {
+        padding: 18px;
+      }
+
+      .ghost-btn,
+      .mini-btn,
+      .inline-copy-btn {
+        width: 100%;
+      }
+
+      .improve-actions {
+        flex-direction: column;
+      }
+
+      .suggestion-row {
+        flex-direction: column;
+      }
+
+      .result-meta {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .result-tools {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      h1 {
+        max-width: none;
+        font-size: 2.75rem;
+      }
+
+      textarea {
+        min-height: 180px;
       }
     }
   </style>
 </head>
 <body>
-  <main class="app-shell">
-    <header class="topbar">
-      <div class="brand">
-        <div class="brand-badge" aria-hidden="true"></div>
-        <div>
-          <div class="brand-name"><span>QuantumAOI</span></div>
-          <div class="brand-tagline">Communication intelligence for modern work</div>
-        </div>
-      </div>
-      <div class="chip">Fast message polish</div>
-    </header>
-
-    <section class="hero">
-      <div class="hero-kicker">QuantumAOI Studio</div>
-      <h1>Say it better, instantly</h1>
-      <p class="subtitle">Write better emails, LinkedIn messages, and follow-ups in seconds.</p>
-    </section>
-
-    <section class="stack">
-      <section class="panel composer">
-        <div class="section-inner">
-          <div class="field-header">
-            <label for="inputText">Your draft</label>
-            <span class="field-note">Paste the raw version. QuantumAOI handles the polish.</span>
+  <main class="page">
+    <section class="shell">
+      <header class="topbar">
+        <div class="brand">
+          <div class="brand-badge" aria-hidden="true"></div>
+          <div>
+            <div class="brand-name"><span>QuantumAOI</span></div>
+            <div class="brand-tagline">Communication intelligence for modern work</div>
           </div>
+        </div>
+        <div class="chip">Fast message polish</div>
+      </header>
 
-          <textarea id="inputText" placeholder="Paste your message..."></textarea>
-          <div class="input-hint">Try something like: ‘Hey, just following up on my application...’</div>
+      <section class="workspace">
+        <section class="panel composer">
+          <div class="hero-kicker">QuantumAOI Studio</div>
+          <h1>Say it better — instantly</h1>
+          <p class="subtitle">Write better emails, LinkedIn messages, and follow-ups in seconds.</p>
 
-          <div class="tone-row">
-            <div class="tone-label">Tone</div>
-            <div class="tone-chips">
-              <button class="tone-chip active" type="button" data-tone="Professional" onclick="setTone('Professional', this)">Professional</button>
-              <button class="tone-chip" type="button" data-tone="Friendly" onclick="setTone('Friendly', this)">Friendly</button>
-              <button class="tone-chip" type="button" data-tone="Confident" onclick="setTone('Confident', this)">Confident</button>
-              <button class="tone-chip" type="button" data-tone="Polite" onclick="setTone('Polite', this)">Polite</button>
+          <div class="compose-card">
+            <div class="field-header">
+              <label for="inputText">Your draft</label>
+              <span class="field-note">Paste the raw version. QuantumAOI handles the polish.</span>
             </div>
+
+            <textarea id="inputText" placeholder="Paste or type your message here..."></textarea>
+            <div class="input-hint">Try something like: ‘Hey, just following up on my application…’</div>
+
+            <div class="tone-row">
+              <div class="tone-label">Tone</div>
+              <div class="tone-chips">
+                <button class="tone-chip active" type="button" data-tone="Professional" onclick="setTone('Professional', this)">Professional</button>
+                <button class="tone-chip" type="button" data-tone="Friendly" onclick="setTone('Friendly', this)">Friendly</button>
+                <button class="tone-chip" type="button" data-tone="Confident" onclick="setTone('Confident', this)">Confident</button>
+                <button class="tone-chip" type="button" data-tone="Polite" onclick="setTone('Polite', this)">Polite</button>
+              </div>
+            </div>
+
+            <button id="rewriteBtn" class="primary-btn" type="button" onclick="rewriteText()">
+              <span class="spinner" aria-hidden="true"></span>
+              <span id="rewriteBtnLabel">✨ Fix it</span>
+            </button>
+            <div class="trust-copy">Used for emails, LinkedIn, and job applications</div>
+            <div class="differentiator">Built specifically for real-world messages — not generic AI responses.</div>
           </div>
+        </section>
 
-          <div class="trust-copy">Used for emails, LinkedIn, and job applications</div>
-          <div class="differentiator">Built specifically for real-world messages, not generic AI responses.</div>
-        </div>
-      </section>
-
-      <section id="outputPanel" class="panel output-panel is-empty">
-        <div class="section-inner">
+        <aside class="panel output-panel">
           <div class="output-head">
             <div>
               <h2 class="output-title">Output</h2>
@@ -848,60 +995,49 @@
             </div>
             <button id="copyBtn" class="ghost-btn hidden" type="button" onclick="copyText()">Copy</button>
           </div>
+          <div class="speed-note">~1.2s response time</div>
 
-          <div id="speedNote" class="speed-note">~1.2s response time</div>
-          <div id="emptyState" class="empty-state">Paste a message and tap Fix it.</div>
+          <div id="outputCard" class="output-card">
+            <div id="emptyState" class="empty-state">Paste a message -&gt; click improve</div>
 
-          <div id="outputShell" class="output-shell">
-            <div id="outputCard" class="output-card">
-              <div id="resultStack" class="result-stack hidden">
-                <div class="result-block">
-                  <span class="result-label">Your message</span>
-                  <p id="beforeText" class="result-copy"></p>
+            <div id="resultStack" class="result-stack hidden">
+              <div class="result-block">
+                <span class="result-label">Your message</span>
+                <p id="beforeText" class="result-copy"></p>
+              </div>
+
+              <div id="afterCard" class="result-block primary">
+                <div id="detectedLabel" class="detected-label hidden"></div>
+                <span class="human-heading">✨ Refined version</span>
+                <p id="output" class="result-copy emphasized" aria-live="polite"></p>
+                <div id="microFeedback" class="micro-feedback hidden"></div>
+                <div class="result-meta">
+                  <div id="confidenceLine" class="confidence-line hidden">✅ Sounds more natural and professional</div>
+                  <button id="copyInlineBtn" class="ghost-btn inline-copy-btn hidden" type="button" onclick="copyText()">Copy</button>
                 </div>
-
-                <div id="afterCard" class="result-block primary">
-                  <div id="detectedLabel" class="detected-label hidden"></div>
-                  <span class="human-heading">✨ This sounds like you at your best</span>
-                  <p id="output" class="result-copy emphasized" aria-live="polite"></p>
-                  <div id="microFeedback" class="micro-feedback hidden"></div>
-                  <div class="result-meta">
-                    <div id="confidenceLine" class="confidence-line hidden">✅ Sounds more natural and professional</div>
-                    <button id="copyInlineBtn" class="ghost-btn inline-copy-btn hidden" type="button" onclick="copyText()">Copy</button>
-                  </div>
-                  <div class="result-tools">
-                    <button id="variationBtn" class="variation-link hidden" type="button" onclick="tryAnotherVersion()">Try another version</button>
-                    <div id="loopbackLine" class="loopback-line hidden">Paste another message when you're ready.</div>
-                  </div>
+                <div class="result-tools">
+                  <button id="variationBtn" class="variation-link hidden" type="button" onclick="tryAnotherVersion()">Try another version</button>
+                  <div id="loopbackLine" class="loopback-line hidden">Paste another message when you're ready.</div>
                 </div>
+              </div>
 
-                <div id="improveSection" class="improve-section">
-                  <div class="refine-prompt">Make it even sharper</div>
-                  <div class="improve-title">Improve further</div>
-                  <div id="suggestionRow" class="suggestion-row"></div>
-                  <div class="improve-actions">
-                    <button class="mini-btn" type="button" onclick="improveAgain('short')">Shorter</button>
-                    <button class="mini-btn" type="button" onclick="improveAgain('friendly')">Friendlier</button>
-                    <button class="mini-btn" type="button" onclick="improveAgain('confident')">Stronger</button>
-                  </div>
-                  <div class="improve-hint">Refine it further.</div>
+              <div id="improveSection" class="improve-section">
+                <div class="refine-prompt">Make it even sharper</div>
+                <div class="improve-title">✨ Improve further</div>
+                <div id="suggestionRow" class="suggestion-row"></div>
+                <div class="improve-actions">
+                  <button class="mini-btn" type="button" onclick="improveAgain('short')">✂️ Shorten</button>
+                  <button class="mini-btn" type="button" onclick="improveAgain('friendly')">😊 Make friendlier</button>
+                  <button class="mini-btn" type="button" onclick="improveAgain('confident')">💪 Make stronger</button>
                 </div>
+                <div class="improve-hint">Refine it further</div>
               </div>
             </div>
           </div>
-        </div>
+        </aside>
       </section>
     </section>
   </main>
-
-  <div class="cta-wrap">
-    <div class="cta-inner">
-      <button id="rewriteBtn" class="primary-btn" type="button" onclick="rewriteText()">
-        <span class="spinner" aria-hidden="true"></span>
-        <span id="rewriteBtnLabel">✨ Fix it</span>
-      </button>
-    </div>
-  </div>
 
   <script>
     const inputText = document.getElementById("inputText");
@@ -922,7 +1058,6 @@
     const variationBtn = document.getElementById("variationBtn");
     const loopbackLine = document.getElementById("loopbackLine");
     const suggestionRow = document.getElementById("suggestionRow");
-    const outputPanel = document.getElementById("outputPanel");
 
     const API_BASE_URL = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
       ? "http://127.0.0.1:8000"
@@ -950,7 +1085,6 @@
     }
 
     function showResults() {
-      outputPanel.classList.remove("is-empty");
       emptyState.classList.add("hidden");
       resultStack.classList.remove("hidden");
       requestAnimationFrame(() => {
@@ -964,7 +1098,6 @@
     }
 
     function showEmptyState() {
-      outputPanel.classList.add("is-empty");
       emptyState.classList.remove("hidden");
       resultStack.classList.add("hidden");
       resultStack.classList.remove("visible");
@@ -1038,6 +1171,88 @@
       chip.classList.add("loading");
       setTimeout(() => chip.classList.remove("pressing"), 130);
       setTimeout(() => chip.classList.remove("loading"), 850);
+    }
+
+    function setMicroFeedback(sourceText, rewrittenText, tone, style = DEFAULT_STYLE) {
+      const sourceLength = normalizeWhitespace(sourceText).length;
+      const rewrittenLength = normalizeWhitespace(rewrittenText).length;
+      const feedbacks = [];
+
+      if (rewrittenLength < sourceLength * 0.92) {
+        feedbacks.push("Clearer and more concise");
+      }
+      if (tone === "Confident" || style === "confident") {
+        feedbacks.push("More confident tone");
+      }
+      if (tone === "Friendly" || style === "friendly") {
+        feedbacks.push("Warmer and easier to read");
+      }
+      if (style === "short") {
+        feedbacks.push("Sharper, tighter phrasing");
+      }
+      if (!feedbacks.length) {
+        feedbacks.push("Cleaner flow and stronger wording");
+      }
+
+      microFeedback.textContent = feedbacks.slice(0, 2).join(" • ");
+      microFeedback.classList.remove("hidden");
+    }
+
+    function getSuggestionConfigs(sourceText) {
+      const lower = sourceText.toLowerCase();
+      const suggestions = [];
+
+      if (selectedTone !== "Confident") {
+        suggestions.push({
+          label: "Make it more direct",
+          style: "confident",
+          tone: "Confident"
+        });
+      }
+
+      if (selectedTone !== "Friendly") {
+        suggestions.push({
+          label: "Make it warmer",
+          style: "friendly",
+          tone: "Friendly"
+        });
+      }
+
+      if (selectedTone !== "Professional") {
+        suggestions.push({
+          label: "Polish for work",
+          style: "default",
+          tone: "Professional"
+        });
+      }
+
+      if (!lower.includes("follow up") && !lower.includes("following up")) {
+        suggestions.push({
+          label: "Turn into follow-up",
+          style: "short",
+          tone: "Professional",
+          transformText: (text) => `Follow up on this message: ${text}`
+        });
+      }
+
+      return suggestions.slice(0, 2);
+    }
+
+    function renderSuggestions(sourceText) {
+      const suggestions = getSuggestionConfigs(sourceText);
+      suggestionRow.innerHTML = "";
+
+      suggestions.forEach((suggestion) => {
+        const chip = document.createElement("button");
+        chip.type = "button";
+        chip.className = "ghost-btn suggestion-chip";
+        chip.textContent = suggestion.label;
+        chip.addEventListener("click", () => {
+          animateSuggestionChip(chip);
+          applySuggestion(suggestion);
+        });
+        suggestionRow.appendChild(chip);
+      });
     }
 
     function detectMessageType(text) {
@@ -1172,88 +1387,6 @@
           currentRequestController = null;
         }
       }
-    }
-
-    function setMicroFeedback(sourceText, rewrittenText, tone, style = DEFAULT_STYLE) {
-      const sourceLength = normalizeWhitespace(sourceText).length;
-      const rewrittenLength = normalizeWhitespace(rewrittenText).length;
-      const feedbacks = [];
-
-      if (rewrittenLength < sourceLength * 0.92) {
-        feedbacks.push("Clearer and more concise");
-      }
-      if (tone === "Confident" || style === "confident") {
-        feedbacks.push("More confident tone");
-      }
-      if (tone === "Friendly" || style === "friendly") {
-        feedbacks.push("Warmer and easier to read");
-      }
-      if (style === "short") {
-        feedbacks.push("Sharper, tighter phrasing");
-      }
-      if (!feedbacks.length) {
-        feedbacks.push("Cleaner flow and stronger wording");
-      }
-
-      microFeedback.textContent = feedbacks.slice(0, 2).join(" • ");
-      microFeedback.classList.remove("hidden");
-    }
-
-    function getSuggestionConfigs(sourceText) {
-      const lower = sourceText.toLowerCase();
-      const suggestions = [];
-
-      if (selectedTone !== "Confident") {
-        suggestions.push({
-          label: "Make it more direct",
-          style: "confident",
-          tone: "Confident"
-        });
-      }
-
-      if (selectedTone !== "Friendly") {
-        suggestions.push({
-          label: "Make it warmer",
-          style: "friendly",
-          tone: "Friendly"
-        });
-      }
-
-      if (selectedTone !== "Professional") {
-        suggestions.push({
-          label: "Polish for work",
-          style: "default",
-          tone: "Professional"
-        });
-      }
-
-      if (!lower.includes("follow up") && !lower.includes("following up")) {
-        suggestions.push({
-          label: "Turn into follow-up",
-          style: "short",
-          tone: "Professional",
-          transformText: (text) => `Follow up on this message: ${text}`
-        });
-      }
-
-      return suggestions.slice(0, 2);
-    }
-
-    function renderSuggestions(sourceText) {
-      const suggestions = getSuggestionConfigs(sourceText);
-      suggestionRow.innerHTML = "";
-
-      suggestions.forEach((suggestion) => {
-        const chip = document.createElement("button");
-        chip.type = "button";
-        chip.className = "suggestion-chip";
-        chip.textContent = suggestion.label;
-        chip.addEventListener("click", () => {
-          animateSuggestionChip(chip);
-          applySuggestion(suggestion);
-        });
-        suggestionRow.appendChild(chip);
-      });
     }
 
     async function rewriteText(override = {}) {
