@@ -14,9 +14,11 @@
       --text: #ecf4ff;
       --muted: #9cb0cb;
       --soft: #7f94b2;
+      --soft-low: rgba(156, 176, 203, 0.76);
       --primary: #69b7ff;
       --primary-2: #7ef0d6;
       --success: #6af0bf;
+      --result-glow: rgba(126, 240, 214, 0.22);
       --shadow: 0 30px 80px rgba(0, 0, 0, 0.35);
       --radius-xl: 30px;
       --radius-lg: 22px;
@@ -225,11 +227,12 @@
     }
 
     .output-card.flash {
-      border-color: rgba(126, 240, 214, 0.28);
+      border-color: rgba(126, 240, 214, 0.34);
       box-shadow:
-        0 0 0 1px rgba(126, 240, 214, 0.2),
+        0 0 0 1px rgba(126, 240, 214, 0.24),
+        0 0 34px rgba(126, 240, 214, 0.12),
         0 18px 34px rgba(0, 0, 0, 0.18);
-      animation: successPulse 850ms ease;
+      animation: successPulse 340ms ease;
     }
 
     .field-header {
@@ -420,7 +423,7 @@
     .trust-copy,
     .differentiator {
       margin-top: 12px;
-      color: var(--soft);
+      color: var(--soft-low);
       font-size: 0.8rem;
       line-height: 1.45;
     }
@@ -447,14 +450,14 @@
     .output-subtitle,
     .speed-note,
     .detected-label {
-      color: var(--muted);
+      color: var(--soft-low);
       font-size: 0.86rem;
       line-height: 1.45;
     }
 
     .detected-label {
-      color: #b7c9e3;
-      margin-bottom: 8px;
+      color: #bfd5f1;
+      margin-bottom: 10px;
     }
 
     .ghost-btn,
@@ -479,6 +482,14 @@
       border-color: rgba(106, 240, 191, 0.24);
       background: rgba(106, 240, 191, 0.08);
       transform: translateY(-1px) scale(1.03);
+    }
+
+    .ghost-btn.ready,
+    .inline-copy-btn.ready {
+      color: #dff7ed;
+      border-color: rgba(126, 240, 214, 0.18);
+      background: rgba(126, 240, 214, 0.05);
+      opacity: 0.92;
     }
 
     .empty-state {
@@ -512,8 +523,35 @@
       border: 1px solid var(--border);
     }
 
+    .result-block:first-child {
+      background: rgba(255, 255, 255, 0.03);
+    }
+
     .result-block.primary {
-      border-color: var(--border-strong);
+      padding: 24px 24px 22px;
+      border-color: rgba(126, 240, 214, 0.24);
+      background:
+        linear-gradient(180deg, rgba(126, 240, 214, 0.06), rgba(255, 255, 255, 0.035) 30%, rgba(255, 255, 255, 0.03)),
+        rgba(255, 255, 255, 0.04);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.06),
+        0 0 0 1px rgba(126, 240, 214, 0.06),
+        0 18px 34px rgba(0, 0, 0, 0.16);
+    }
+
+    .result-block.primary::after {
+      content: "";
+      position: absolute;
+      inset: -1px;
+      border-radius: inherit;
+      background: radial-gradient(circle at top left, rgba(126, 240, 214, 0.14), transparent 34%);
+      opacity: 0.8;
+      pointer-events: none;
+    }
+
+    .result-block.primary {
+      position: relative;
+      overflow: hidden;
       box-shadow:
         inset 0 1px 0 rgba(255, 255, 255, 0.04),
         0 18px 34px rgba(0, 0, 0, 0.16);
@@ -530,7 +568,7 @@
     .result-label {
       display: block;
       margin-bottom: 8px;
-      color: var(--soft);
+      color: rgba(159, 178, 204, 0.66);
       font-size: 0.76rem;
       text-transform: uppercase;
       letter-spacing: 0.1em;
@@ -538,30 +576,32 @@
 
     .human-heading {
       display: block;
-      margin-bottom: 14px;
-      color: #f4fbff;
-      font-size: 1.06rem;
-      font-weight: 600;
+      margin-bottom: 16px;
+      color: #f8fcff;
+      font-size: 1rem;
+      font-weight: 700;
       letter-spacing: -0.02em;
     }
 
     .result-copy {
       margin: 0;
-      color: #f5faff;
-      line-height: 1.82;
+      color: rgba(234, 243, 255, 0.78);
+      line-height: 1.8;
       font-size: 0.98rem;
       white-space: pre-wrap;
     }
 
     .result-copy.emphasized {
-      font-size: 1.08rem;
-      line-height: 1.92;
+      font-size: 1.18rem;
+      line-height: 1.96;
       color: #ffffff;
-      letter-spacing: -0.01em;
+      letter-spacing: -0.015em;
+      text-wrap: pretty;
+      text-shadow: 0 0 24px rgba(105, 183, 255, 0.08);
     }
 
     .result-copy.reveal {
-      animation: outputReveal 300ms ease;
+      animation: outputReveal 380ms cubic-bezier(0.2, 0.8, 0.2, 1);
     }
 
     .result-meta {
@@ -576,6 +616,44 @@
       color: #c9f8e7;
       font-size: 0.84rem;
       line-height: 1.45;
+    }
+
+    .micro-feedback {
+      margin-top: 10px;
+      color: rgba(201, 248, 231, 0.86);
+      font-size: 0.82rem;
+      line-height: 1.45;
+    }
+
+    .result-tools {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 16px;
+      flex-wrap: wrap;
+    }
+
+    .variation-link {
+      padding: 0;
+      border: 0;
+      background: transparent;
+      color: #d7e8ff;
+      font-size: 0.84rem;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      opacity: 0.88;
+    }
+
+    .variation-link:hover:not(:disabled) {
+      opacity: 1;
+      transform: translateY(-1px);
+      color: #f4fbff;
+    }
+
+    .variation-link.loading {
+      color: #f4fbff;
+      text-shadow: 0 0 18px rgba(126, 240, 214, 0.22);
     }
 
     .inline-copy-btn {
@@ -622,26 +700,134 @@
     }
 
     .improve-title {
-      font-size: 1rem;
-      font-weight: 600;
-      color: #f2f8ff;
+      font-size: 1.02rem;
+      font-weight: 700;
+      color: #f7fbff;
     }
 
     .refine-prompt {
-      color: var(--muted);
-      font-size: 0.84rem;
+      color: rgba(156, 176, 203, 0.78);
+      font-size: 0.82rem;
       margin-bottom: 2px;
     }
 
     .improve-actions {
       display: flex;
       flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .suggestion-row {
+      display: flex;
+      flex-wrap: wrap;
       gap: 10px;
+      margin-top: 4px;
+    }
+
+    .suggestion-chip {
+      position: relative;
+      overflow: hidden;
+      padding: 9px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: rgba(255, 255, 255, 0.04);
+      color: rgba(236, 245, 255, 0.86);
+      font-size: 0.79rem;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .suggestion-chip:hover:not(:disabled) {
+      transform: translateY(-1px);
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(126, 240, 214, 0.16);
+      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.16);
+    }
+
+    .suggestion-chip:active:not(:disabled),
+    .suggestion-chip.pressing {
+      transform: scale(0.97);
+    }
+
+    .suggestion-chip.loading {
+      border-color: rgba(105, 183, 255, 0.22);
+      box-shadow:
+        0 0 0 1px rgba(105, 183, 255, 0.08),
+        0 0 18px rgba(105, 183, 255, 0.12);
+    }
+
+    .suggestion-chip.loading::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.16), transparent);
+      animation: shimmer 900ms linear infinite;
     }
 
     .improve-hint {
-      color: var(--soft);
-      font-size: 0.84rem;
+      color: rgba(156, 176, 203, 0.76);
+      font-size: 0.82rem;
+    }
+
+    .loopback-line {
+      color: rgba(156, 176, 203, 0.72);
+      font-size: 0.8rem;
+      line-height: 1.45;
+    }
+
+    .mini-btn {
+      position: relative;
+      overflow: hidden;
+      padding: 13px 16px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.065);
+      border-color: rgba(255, 255, 255, 0.1);
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: #edf5ff;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    }
+
+    .mini-btn::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(120deg, transparent, rgba(255, 255, 255, 0.14), transparent);
+      transform: translateX(-120%);
+      transition: transform 500ms ease;
+    }
+
+    .mini-btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(126, 240, 214, 0.18);
+      box-shadow:
+        0 14px 28px rgba(0, 0, 0, 0.18),
+        0 0 0 1px rgba(126, 240, 214, 0.08);
+    }
+
+    .mini-btn:hover:not(:disabled)::before {
+      transform: translateX(120%);
+    }
+
+    .mini-btn:active:not(:disabled),
+    .mini-btn.pressing {
+      transform: translateY(0) scale(0.97);
+    }
+
+    .mini-btn.loading {
+      border-color: rgba(105, 183, 255, 0.22);
+      box-shadow:
+        0 0 0 1px rgba(105, 183, 255, 0.1),
+        0 0 20px rgba(105, 183, 255, 0.14);
+    }
+
+    .mini-btn.loading::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.18), transparent);
+      animation: shimmer 900ms linear infinite;
     }
 
     .hidden {
@@ -668,17 +854,21 @@
 
     @keyframes successPulse {
       0% {
-        box-shadow: 0 0 0 0 rgba(126, 240, 214, 0.35);
+        box-shadow:
+          0 0 0 0 rgba(126, 240, 214, 0.28),
+          0 0 0 0 rgba(105, 183, 255, 0.2);
       }
       100% {
-        box-shadow: 0 0 0 18px rgba(126, 240, 214, 0);
+        box-shadow:
+          0 0 0 14px rgba(126, 240, 214, 0),
+          0 0 0 24px rgba(105, 183, 255, 0);
       }
     }
 
     @keyframes outputReveal {
       from {
         opacity: 0;
-        transform: translateY(4px);
+        transform: translateY(10px);
       }
       to {
         opacity: 1;
@@ -724,7 +914,16 @@
         flex-direction: column;
       }
 
+      .suggestion-row {
+        flex-direction: column;
+      }
+
       .result-meta {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .result-tools {
         flex-direction: column;
         align-items: stretch;
       }
@@ -809,23 +1008,29 @@
 
               <div id="afterCard" class="result-block primary">
                 <div id="detectedLabel" class="detected-label hidden"></div>
-                <span class="human-heading">✨ Here’s a better way to say it</span>
+                <span class="human-heading">✨ Refined version</span>
                 <p id="output" class="result-copy emphasized" aria-live="polite"></p>
+                <div id="microFeedback" class="micro-feedback hidden"></div>
                 <div class="result-meta">
                   <div id="confidenceLine" class="confidence-line hidden">✅ Sounds more natural and professional</div>
                   <button id="copyInlineBtn" class="ghost-btn inline-copy-btn hidden" type="button" onclick="copyText()">Copy</button>
                 </div>
+                <div class="result-tools">
+                  <button id="variationBtn" class="variation-link hidden" type="button" onclick="tryAnotherVersion()">Try another version</button>
+                  <div id="loopbackLine" class="loopback-line hidden">Paste another message when you're ready.</div>
+                </div>
               </div>
 
               <div id="improveSection" class="improve-section">
-                <div class="refine-prompt">Want to refine it more?</div>
+                <div class="refine-prompt">Make it even sharper</div>
                 <div class="improve-title">✨ Improve further</div>
+                <div id="suggestionRow" class="suggestion-row"></div>
                 <div class="improve-actions">
                   <button class="mini-btn" type="button" onclick="improveAgain('short')">✂️ Shorten</button>
                   <button class="mini-btn" type="button" onclick="improveAgain('friendly')">😊 Make friendlier</button>
                   <button class="mini-btn" type="button" onclick="improveAgain('confident')">💪 Make stronger</button>
                 </div>
-                <div class="improve-hint">Tap a button to tweak your message</div>
+                <div class="improve-hint">Refine it further</div>
               </div>
             </div>
           </div>
@@ -849,6 +1054,10 @@
     const detectedLabel = document.getElementById("detectedLabel");
     const confidenceLine = document.getElementById("confidenceLine");
     const copyInlineBtn = document.getElementById("copyInlineBtn");
+    const microFeedback = document.getElementById("microFeedback");
+    const variationBtn = document.getElementById("variationBtn");
+    const loopbackLine = document.getElementById("loopbackLine");
+    const suggestionRow = document.getElementById("suggestionRow");
 
     const API_BASE_URL = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
       ? "http://127.0.0.1:8000"
@@ -863,6 +1072,8 @@
     let requestSequence = 0;
     let lastAbortReason = "";
     let currentOutput = "";
+    let lastSourceText = "";
+    let variationIndex = 0;
 
     function setLoadingState(isLoading) {
       rewriteBtn.disabled = isLoading;
@@ -881,7 +1092,9 @@
       });
       copyBtn.classList.remove("hidden");
       copyInlineBtn.classList.remove("hidden");
+      variationBtn.classList.remove("hidden");
       improveSection.classList.add("visible");
+      loopbackLine.classList.remove("hidden");
     }
 
     function showEmptyState() {
@@ -890,9 +1103,13 @@
       resultStack.classList.remove("visible");
       copyBtn.classList.add("hidden");
       copyInlineBtn.classList.add("hidden");
+      variationBtn.classList.add("hidden");
       improveSection.classList.remove("visible");
       detectedLabel.classList.add("hidden");
       confidenceLine.classList.add("hidden");
+      microFeedback.classList.add("hidden");
+      loopbackLine.classList.add("hidden");
+      suggestionRow.innerHTML = "";
     }
 
     function clearTypingAnimation() {
@@ -933,7 +1150,109 @@
       outputCard.classList.add("flash");
       setTimeout(() => {
         outputCard.classList.remove("flash");
-      }, 850);
+      }, 340);
+    }
+
+    function animateImproveButton(button) {
+      if (!button) {
+        return;
+      }
+      button.classList.add("pressing");
+      button.classList.add("loading");
+      setTimeout(() => button.classList.remove("pressing"), 130);
+      setTimeout(() => button.classList.remove("loading"), 850);
+    }
+
+    function animateSuggestionChip(chip) {
+      if (!chip) {
+        return;
+      }
+      chip.classList.add("pressing");
+      chip.classList.add("loading");
+      setTimeout(() => chip.classList.remove("pressing"), 130);
+      setTimeout(() => chip.classList.remove("loading"), 850);
+    }
+
+    function setMicroFeedback(sourceText, rewrittenText, tone, style = DEFAULT_STYLE) {
+      const sourceLength = normalizeWhitespace(sourceText).length;
+      const rewrittenLength = normalizeWhitespace(rewrittenText).length;
+      const feedbacks = [];
+
+      if (rewrittenLength < sourceLength * 0.92) {
+        feedbacks.push("Clearer and more concise");
+      }
+      if (tone === "Confident" || style === "confident") {
+        feedbacks.push("More confident tone");
+      }
+      if (tone === "Friendly" || style === "friendly") {
+        feedbacks.push("Warmer and easier to read");
+      }
+      if (style === "short") {
+        feedbacks.push("Sharper, tighter phrasing");
+      }
+      if (!feedbacks.length) {
+        feedbacks.push("Cleaner flow and stronger wording");
+      }
+
+      microFeedback.textContent = feedbacks.slice(0, 2).join(" • ");
+      microFeedback.classList.remove("hidden");
+    }
+
+    function getSuggestionConfigs(sourceText) {
+      const lower = sourceText.toLowerCase();
+      const suggestions = [];
+
+      if (selectedTone !== "Confident") {
+        suggestions.push({
+          label: "Make it more direct",
+          style: "confident",
+          tone: "Confident"
+        });
+      }
+
+      if (selectedTone !== "Friendly") {
+        suggestions.push({
+          label: "Make it warmer",
+          style: "friendly",
+          tone: "Friendly"
+        });
+      }
+
+      if (selectedTone !== "Professional") {
+        suggestions.push({
+          label: "Polish for work",
+          style: "default",
+          tone: "Professional"
+        });
+      }
+
+      if (!lower.includes("follow up") && !lower.includes("following up")) {
+        suggestions.push({
+          label: "Turn into follow-up",
+          style: "short",
+          tone: "Professional",
+          transformText: (text) => `Follow up on this message: ${text}`
+        });
+      }
+
+      return suggestions.slice(0, 2);
+    }
+
+    function renderSuggestions(sourceText) {
+      const suggestions = getSuggestionConfigs(sourceText);
+      suggestionRow.innerHTML = "";
+
+      suggestions.forEach((suggestion) => {
+        const chip = document.createElement("button");
+        chip.type = "button";
+        chip.className = "ghost-btn suggestion-chip";
+        chip.textContent = suggestion.label;
+        chip.addEventListener("click", () => {
+          animateSuggestionChip(chip);
+          applySuggestion(suggestion);
+        });
+        suggestionRow.appendChild(chip);
+      });
     }
 
     function detectMessageType(text) {
@@ -999,11 +1318,11 @@
       return polished || rewrittenText.trim();
     }
 
-    function buildPayload(text, style = DEFAULT_STYLE) {
+    function buildPayload(text, style = DEFAULT_STYLE, tone = selectedTone, context = DEFAULT_CONTEXT) {
       return {
         text,
-        context: DEFAULT_CONTEXT,
-        tone: selectedTone,
+        context,
+        tone,
         style
       };
     }
@@ -1073,6 +1392,8 @@
     async function rewriteText(override = {}) {
       const sourceText = (override.text || inputText.value).trim();
       const style = override.style || DEFAULT_STYLE;
+      const tone = override.tone || selectedTone;
+      const context = override.context || DEFAULT_CONTEXT;
 
       if (!sourceText) {
         showEmptyState();
@@ -1085,17 +1406,20 @@
       setLoadingState(true);
       showResults();
 
+      lastSourceText = sourceText;
       beforeText.textContent = sourceText;
       detectedLabel.textContent = detectMessageType(sourceText);
       detectedLabel.classList.remove("hidden");
-      confidenceLine.textContent = getConfidenceLine(selectedTone);
+      confidenceLine.textContent = getConfidenceLine(tone);
       confidenceLine.classList.add("hidden");
+      microFeedback.classList.add("hidden");
       output.textContent = "";
       afterCard.classList.add("shimmer");
       afterCard.classList.add("preparing");
+      variationBtn.classList.add("loading");
 
       try {
-        const rewritten = await requestRewrite(buildPayload(sourceText, style), currentRequestId);
+        const rewritten = await requestRewrite(buildPayload(sourceText, style, tone, context), currentRequestId);
         if (!rewritten) {
           throw new Error("No rewritten text was returned.");
         }
@@ -1107,6 +1431,8 @@
           afterCard.classList.remove("preparing");
           typeText(polishedRewrite);
           confidenceLine.classList.remove("hidden");
+          setMicroFeedback(sourceText, polishedRewrite, tone, style);
+          renderSuggestions(sourceText);
           triggerOutputFlash();
         }, 180);
       } catch (error) {
@@ -1117,8 +1443,10 @@
         }
         currentOutput = "";
         confidenceLine.classList.add("hidden");
+        microFeedback.classList.add("hidden");
         output.textContent = error.message || "Something went wrong. Please try again.";
       } finally {
+        variationBtn.classList.remove("loading");
         setLoadingState(false);
       }
     }
@@ -1128,7 +1456,38 @@
       if (!sourceText) {
         return;
       }
+      const button = document.querySelector(`.mini-btn[onclick="improveAgain('${style}')"]`);
+      animateImproveButton(button);
       rewriteText({ text: sourceText, style });
+    }
+
+    function tryAnotherVersion() {
+      if (!lastSourceText) {
+        return;
+      }
+
+      const variants = [
+        { style: "confident", tone: "Confident" },
+        { style: "friendly", tone: "Friendly" },
+        { style: "short", tone: selectedTone },
+        { style: "default", tone: selectedTone }
+      ];
+      variationIndex = (variationIndex + 1) % variants.length;
+      const variant = variants[variationIndex];
+      rewriteText({ text: lastSourceText, style: variant.style, tone: variant.tone });
+    }
+
+    function applySuggestion(suggestion) {
+      const nextText = typeof suggestion.transformText === "function"
+        ? suggestion.transformText(lastSourceText || inputText.value.trim())
+        : (lastSourceText || inputText.value.trim());
+
+      rewriteText({
+        text: nextText,
+        style: suggestion.style || DEFAULT_STYLE,
+        tone: suggestion.tone || selectedTone,
+        context: suggestion.context || DEFAULT_CONTEXT
+      });
     }
 
     async function copyText() {
@@ -1139,16 +1498,26 @@
 
       try {
         await navigator.clipboard.writeText(text);
+        copyBtn.classList.remove("ready");
+        copyInlineBtn.classList.remove("ready");
         copyBtn.classList.add("copied");
         copyInlineBtn.classList.add("copied");
-        copyBtn.textContent = "✅ Copied — try another message";
-        copyInlineBtn.textContent = "✅ Copied";
+        copyBtn.textContent = "Copied ✓";
+        copyInlineBtn.textContent = "Copied ✓";
         setTimeout(() => {
           copyBtn.classList.remove("copied");
           copyInlineBtn.classList.remove("copied");
+          copyBtn.classList.add("ready");
+          copyInlineBtn.classList.add("ready");
+          copyBtn.textContent = "Try another message";
+          copyInlineBtn.textContent = "Try another message";
+        }, 900);
+        setTimeout(() => {
+          copyBtn.classList.remove("ready");
+          copyInlineBtn.classList.remove("ready");
           copyBtn.textContent = "Copy";
           copyInlineBtn.textContent = "Copy";
-        }, 2200);
+        }, 2400);
       } catch (error) {
         copyBtn.textContent = "Copy failed";
         copyInlineBtn.textContent = "Copy failed";
