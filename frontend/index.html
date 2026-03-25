@@ -1014,9 +1014,13 @@
     const inputHint = document.querySelector(".input-hint");
     const composer = document.querySelector(".composer");
 
-    const API_BASE_URL = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
-      ? "http://127.0.0.1:8000"
-      : "https://quantumaoi-backend.onrender.com";
+    // const API_BASE_URL = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
+    //   ? "http://127.0.0.1:8000"
+    //   : "https://quantumaoi-backend.onrender.com";
+    
+    const API_BASE_URL =   window.location.hostname === "localhost"
+    ? "http://127.0.0.1:8000"
+    : "https://quantumaoi.onrender.com";  
     const REQUEST_TIMEOUT_MS = 20000;
     const DEFAULT_CONTEXT = "Email";
     let selectedTone = "Professional";

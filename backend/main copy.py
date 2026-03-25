@@ -64,6 +64,10 @@ STYLE_GUIDANCE = {
     "confident": "Push it slightly more assertive and decisive.",
     "short": "Make it tighter and more economical.",
     "friendly": "Make it warmer and more approachable.",
+    "simple": "Use basic words, short sentences, and make the meaning easy to understand.",
+    "polite": "Make it respectful, friendly, and easy to receive without sounding stiff.",
+    "strong": "Make it more confident, direct, and clear without sounding aggressive.",
+    "technical": "Make it more precise, specific, and professionally technical while staying clear and readable.",
 }
 
 VOICE_GUIDANCE = (
@@ -100,6 +104,10 @@ ACTION_GUIDANCE = {
     "shorten": "Make it tighter, sharper, and more intentional rather than simply shorter.",
     "friendlier": "Make it warmer and easier to connect with while keeping it natural and unsentimental.",
     "stronger": "Make it more direct, confident, and intentional without sounding aggressive.",
+    "simple": "Rewrite with basic words, short sentences, and very clear meaning.",
+    "polite": "Make it more respectful and friendly while keeping it natural and concise.",
+    "strong": "Make it more confident and direct while keeping it natural and readable.",
+    "technical": "Increase precision and specificity, use professional terminology where it helps, and keep the message concise and clear.",
 }
 
 SYSTEM_PROMPT = """
@@ -113,9 +121,15 @@ Principles:
 - Prefer strong phrasing, clean structure, and natural rhythm.
 - Rewrite deeply when needed: reorder ideas, split or combine sentences, and replace weak phrasing.
 - Avoid mirroring the source sentence-by-sentence.
+- Rewrite for context and intent, not literal translation.
+- Do NOT preserve awkward or unnatural phrases. Rewrite the message as a native speaker would naturally say it.
+- Do not carry over unusual, loaded, or awkward source words unless they clearly fit the situation.
+- Prefer clarity, simplicity, and natural tone over literal translation.
+- Prefer natural phrasing over direct word-for-word conversion.
 - Keep the original intent, but upgrade the writing.
 - Favor clear, confident, slightly direct language.
 - Remove weak phrasing, filler, and default corporate politeness.
+- Keep the message concise. Do not add unnecessary sentences.
 - Apply a subtle final polish so the result feels refined, sharp, and occasionally impressive.
 - Keep some controlled variation in phrasing so outputs do not feel mass-produced.
 
@@ -128,12 +142,14 @@ If not, refine once before answering.
 Always respond in exactly this format:
 TYPE: <message type>
 OUTPUT: <final text>
+
+In OUTPUT, return only the improved message. Do not include explanations or extra text.
 """.strip()
 
 
 class RewriteRequest(BaseModel):
     text: str = Field(..., min_length=1, max_length=5000)
-    action: Optional[Literal["shorten", "friendlier", "stronger"]] = None
+    action: Optional[Literal["shorten", "friendlier", "stronger", "simple", "polite", "strong", "technical"]] = None
     previous_output: Optional[str] = Field(default=None, max_length=5000)
     context: Literal[
         "Email",
@@ -169,7 +185,7 @@ class RewriteRequest(BaseModel):
         "Modern Casual",
         "Futuristic",
     ] = "Professional"
-    style: Literal["default", "confident", "short", "friendly"] = "default"
+    style: Literal["default", "confident", "short", "friendly", "simple", "polite", "strong", "technical"] = "default"
 
     @field_validator("text", "previous_output")
     @classmethod
@@ -221,6 +237,23 @@ def detect_message_type(text: str, context: Optional[str]) -> str:
     return context or "Message"
 
 
+def detect_intent(text: str) -> str:
+    stripped = text.strip()
+    lowered = stripped.lower()
+
+    if "?" in stripped or lowered.startswith(
+        ("can you", "could you", "would you", "are you", "is there", "do you", "did you", "have you")
+    ):
+        return "question"
+
+    if lowered.startswith(
+        ("please", "can you", "could you", "would you", "let's", "pls", "do ", "send ", "share ")
+    ):
+        return "request"
+
+    return "statement"
+
+
 def normalize_action(action: Optional[str], style: str) -> Optional[str]:
     if action:
         return action
@@ -229,14 +262,19 @@ def normalize_action(action: Optional[str], style: str) -> Optional[str]:
         "short": "shorten",
         "friendly": "friendlier",
         "confident": "stronger",
+        "simple": "simple",
+        "polite": "polite",
+        "strong": "strong",
+        "technical": "technical",
     }
     return style_to_action.get(style)
 
 
-def build_quality_rules(message_type: str) -> str:
+def build_quality_rules(message_type: str, intent: str) -> str:
     return "\n".join(
         [
             f"- Treat this as a {message_type} and shape the writing accordingly.",
+            f"- Preserve the intent as a {intent}; do not turn a question into a statement or a request into a demand.",
             "- The output must feel like a meaningful upgrade, not a light edit.",
             "- Improve structure, flow, and clarity before polishing word choice.",
             "- Use stronger, more intentional phrasing.",
@@ -246,18 +284,27 @@ def build_quality_rules(message_type: str) -> str:
             "- Improve rhythm and readability, not just correctness.",
             "- Remove filler, hedging, repetition, and generic AI-sounding wording.",
             "- Simplify clunky phrasing, combine ideas when the writing feels choppy, and split ideas when a sentence gets heavy.",
+            "- Rewrite from meaning and context, not from literal word carryover.",
+            "- Do NOT preserve awkward or unnatural phrases. Rewrite the message as a native speaker would naturally say it.",
+            "- Avoid preserving unusual or culturally loaded words unless they are clearly appropriate in natural English.",
+            "- Prefer clarity, simplicity, and natural tone over literal translation.",
             "- Preserve meaning, but do not preserve weak phrasing.",
             "- Keep it concise and high-signal.",
+            "- Keep the message concise. Do not add unnecessary sentences.",
             "- Replace weak phrasing with stronger alternatives when it improves the line.",
+            "- Use more precise and domain-appropriate terminology when the message is technical or work-related.",
+            "- Keep technical rewrites readable; do not add jargon just to sound smarter.",
             VARIATION_GUIDANCE,
             POLISH_GUIDANCE,
             ANTI_AI_GUIDANCE,
+            "- In OUTPUT, return only the improved message. Do not include explanations or extra text.",
             "- Return only the required TYPE/OUTPUT format.",
         ]
     )
 
 
 def build_rewrite_prompt(request: RewriteRequest, message_type: str) -> str:
+    intent = detect_intent(request.text)
     message_guidance = MESSAGE_TYPE_GUIDANCE.get(
         message_type,
         "Adapt the message naturally to its use case.",
@@ -275,6 +322,7 @@ def build_rewrite_prompt(request: RewriteRequest, message_type: str) -> str:
 Rewrite this message so it feels premium and clearly stronger than the original.
 
 Detected message type: {message_type}
+Detected intent: {intent}
 Message-type guidance: {message_guidance}
 Tone guidance: {tone_guidance}
 Style guidance: {style_guidance}
@@ -282,7 +330,7 @@ Voice guidance: {VOICE_GUIDANCE}
 Variation guidance: {VARIATION_GUIDANCE}
 
 Rewrite rules:
-{build_quality_rules(message_type)}
+{build_quality_rules(message_type, intent)}
 
 Source message:
 {request.text}
@@ -290,6 +338,7 @@ Source message:
 
 
 def build_action_prompt(request: RewriteRequest, message_type: str, action: str) -> str:
+    intent = detect_intent(request.text)
     message_guidance = MESSAGE_TYPE_GUIDANCE.get(
         message_type,
         "Adapt the message naturally to its use case.",
@@ -304,6 +353,7 @@ def build_action_prompt(request: RewriteRequest, message_type: str, action: str)
 Refine an already strong rewrite.
 
 Detected message type: {message_type}
+Detected intent: {intent}
 Message-type guidance: {message_guidance}
 Tone guidance: {tone_guidance}
 Requested action: {action}
@@ -312,7 +362,7 @@ Voice guidance: {VOICE_GUIDANCE}
 Variation guidance: {VARIATION_GUIDANCE}
 
 Rules:
-{build_quality_rules(message_type)}
+{build_quality_rules(message_type, intent)}
 - Refine the previous output instead of rewriting from scratch.
 - Keep the voice, intent, and general direction of the previous output.
 - Improve quality further. Do not make it flatter, weaker, or more generic.
@@ -429,6 +479,7 @@ def build_retry_prompt(prompt: str) -> str:
         "Make it more concise and direct.\n"
         "Remove weak phrasing and any generic or overly polite language.\n"
         "Improve flow, rhythm, and sentence quality.\n"
+        "Rewrite any awkward phrasing the way a native speaker would naturally say it.\n"
         "Tighten the ending so it feels intentional rather than default.\n"
         "Restructure where useful instead of paraphrasing line by line.\n"
         "Do not become longer unless length is clearly necessary for clarity."

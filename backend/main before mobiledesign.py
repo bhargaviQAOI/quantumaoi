@@ -1,6 +1,5 @@
 import os
 import re
-import json
 from typing import Literal, Optional
 
 from dotenv import load_dotenv
@@ -8,10 +7,8 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from openai import APIConnectionError, APIStatusError, APITimeoutError, OpenAI
 from pydantic import BaseModel, Field, field_validator
-import requests
 
-load_dotenv(override=False)
-load_dotenv(os.path.join(os.path.dirname(__file__), ".env"), override=False)
+load_dotenv()
 
 app = FastAPI()
 
@@ -25,9 +22,6 @@ app.add_middleware(
 
 MODEL_NAME = "gpt-4.1-mini"
 MAX_COMPLETION_TOKENS = 260
-OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions"
-OPENROUTER_MODEL_NAME = "openchat/openchat-3.5"
-OPENROUTER_ERROR_RESPONSES = {"AI service error", "Server error"}
 
 MESSAGE_TYPE_GUIDANCE = {
     "Email": "Structure it cleanly, make the point early, and keep the flow polished.",
@@ -70,10 +64,6 @@ STYLE_GUIDANCE = {
     "confident": "Push it slightly more assertive and decisive.",
     "short": "Make it tighter and more economical.",
     "friendly": "Make it warmer and more approachable.",
-    "simple": "Use basic words, short sentences, and make the meaning easy to understand.",
-    "polite": "Make it respectful, friendly, and easy to receive without sounding stiff.",
-    "strong": "Make it more confident, direct, and clear without sounding aggressive.",
-    "technical": "Make it more precise, specific, and professionally technical while staying clear and readable.",
 }
 
 VOICE_GUIDANCE = (
@@ -110,10 +100,6 @@ ACTION_GUIDANCE = {
     "shorten": "Make it tighter, sharper, and more intentional rather than simply shorter.",
     "friendlier": "Make it warmer and easier to connect with while keeping it natural and unsentimental.",
     "stronger": "Make it more direct, confident, and intentional without sounding aggressive.",
-    "simple": "Rewrite with basic words, short sentences, and very clear meaning.",
-    "polite": "Make it more respectful and friendly while keeping it natural and concise.",
-    "strong": "Make it more confident and direct while keeping it natural and readable.",
-    "technical": "Increase precision and specificity, use professional terminology where it helps, and keep the message concise and clear.",
 }
 
 SYSTEM_PROMPT = """
@@ -127,15 +113,9 @@ Principles:
 - Prefer strong phrasing, clean structure, and natural rhythm.
 - Rewrite deeply when needed: reorder ideas, split or combine sentences, and replace weak phrasing.
 - Avoid mirroring the source sentence-by-sentence.
-- Rewrite for context and intent, not literal translation.
-- Do NOT preserve awkward or unnatural phrases. Rewrite the message as a native speaker would naturally say it.
-- Do not carry over unusual, loaded, or awkward source words unless they clearly fit the situation.
-- Prefer clarity, simplicity, and natural tone over literal translation.
-- Prefer natural phrasing over direct word-for-word conversion.
 - Keep the original intent, but upgrade the writing.
 - Favor clear, confident, slightly direct language.
 - Remove weak phrasing, filler, and default corporate politeness.
-- Keep the message concise. Do not add unnecessary sentences.
 - Apply a subtle final polish so the result feels refined, sharp, and occasionally impressive.
 - Keep some controlled variation in phrasing so outputs do not feel mass-produced.
 
@@ -148,14 +128,12 @@ If not, refine once before answering.
 Always respond in exactly this format:
 TYPE: <message type>
 OUTPUT: <final text>
-
-In OUTPUT, return only the improved message. Do not include explanations or extra text.
 """.strip()
 
 
 class RewriteRequest(BaseModel):
     text: str = Field(..., min_length=1, max_length=5000)
-    action: Optional[Literal["shorten", "friendlier", "stronger", "simple", "polite", "strong", "technical"]] = None
+    action: Optional[Literal["shorten", "friendlier", "stronger"]] = None
     previous_output: Optional[str] = Field(default=None, max_length=5000)
     context: Literal[
         "Email",
@@ -191,7 +169,7 @@ class RewriteRequest(BaseModel):
         "Modern Casual",
         "Futuristic",
     ] = "Professional"
-    style: Literal["default", "confident", "short", "friendly", "simple", "polite", "strong", "technical"] = "default"
+    style: Literal["default", "confident", "short", "friendly"] = "default"
 
     @field_validator("text", "previous_output")
     @classmethod
@@ -211,19 +189,6 @@ def get_openai_client() -> OpenAI:
     if api_key == "your_api_key_here":
         raise HTTPException(status_code=500, detail="OPENAI_API_KEY is still using the placeholder value.")
     return OpenAI(api_key=api_key)
-
-
-def get_openrouter_api_key() -> str:
-    api_key = os.getenv("OPENROUTER_API_KEY")
-    if not api_key:
-        openai_api_key = os.getenv("OPENAI_API_KEY")
-        if openai_api_key and openai_api_key.startswith("sk-or-v1-"):
-            api_key = openai_api_key
-    if not api_key:
-        raise HTTPException(status_code=500, detail="OPENROUTER_API_KEY is not configured.")
-    if api_key == "your_api_key_here":
-        raise HTTPException(status_code=500, detail="OPENROUTER_API_KEY is still using the placeholder value.")
-    return api_key
 
 
 def normalize_whitespace(text: str) -> str:
@@ -256,23 +221,6 @@ def detect_message_type(text: str, context: Optional[str]) -> str:
     return context or "Message"
 
 
-def detect_intent(text: str) -> str:
-    stripped = text.strip()
-    lowered = stripped.lower()
-
-    if "?" in stripped or lowered.startswith(
-        ("can you", "could you", "would you", "are you", "is there", "do you", "did you", "have you")
-    ):
-        return "question"
-
-    if lowered.startswith(
-        ("please", "can you", "could you", "would you", "let's", "pls", "do ", "send ", "share ")
-    ):
-        return "request"
-
-    return "statement"
-
-
 def normalize_action(action: Optional[str], style: str) -> Optional[str]:
     if action:
         return action
@@ -281,19 +229,14 @@ def normalize_action(action: Optional[str], style: str) -> Optional[str]:
         "short": "shorten",
         "friendly": "friendlier",
         "confident": "stronger",
-        "simple": "simple",
-        "polite": "polite",
-        "strong": "strong",
-        "technical": "technical",
     }
     return style_to_action.get(style)
 
 
-def build_quality_rules(message_type: str, intent: str) -> str:
+def build_quality_rules(message_type: str) -> str:
     return "\n".join(
         [
             f"- Treat this as a {message_type} and shape the writing accordingly.",
-            f"- Preserve the intent as a {intent}; do not turn a question into a statement or a request into a demand.",
             "- The output must feel like a meaningful upgrade, not a light edit.",
             "- Improve structure, flow, and clarity before polishing word choice.",
             "- Use stronger, more intentional phrasing.",
@@ -303,27 +246,18 @@ def build_quality_rules(message_type: str, intent: str) -> str:
             "- Improve rhythm and readability, not just correctness.",
             "- Remove filler, hedging, repetition, and generic AI-sounding wording.",
             "- Simplify clunky phrasing, combine ideas when the writing feels choppy, and split ideas when a sentence gets heavy.",
-            "- Rewrite from meaning and context, not from literal word carryover.",
-            "- Do NOT preserve awkward or unnatural phrases. Rewrite the message as a native speaker would naturally say it.",
-            "- Avoid preserving unusual or culturally loaded words unless they are clearly appropriate in natural English.",
-            "- Prefer clarity, simplicity, and natural tone over literal translation.",
             "- Preserve meaning, but do not preserve weak phrasing.",
             "- Keep it concise and high-signal.",
-            "- Keep the message concise. Do not add unnecessary sentences.",
             "- Replace weak phrasing with stronger alternatives when it improves the line.",
-            "- Use more precise and domain-appropriate terminology when the message is technical or work-related.",
-            "- Keep technical rewrites readable; do not add jargon just to sound smarter.",
             VARIATION_GUIDANCE,
             POLISH_GUIDANCE,
             ANTI_AI_GUIDANCE,
-            "- In OUTPUT, return only the improved message. Do not include explanations or extra text.",
             "- Return only the required TYPE/OUTPUT format.",
         ]
     )
 
 
 def build_rewrite_prompt(request: RewriteRequest, message_type: str) -> str:
-    intent = detect_intent(request.text)
     message_guidance = MESSAGE_TYPE_GUIDANCE.get(
         message_type,
         "Adapt the message naturally to its use case.",
@@ -341,7 +275,6 @@ def build_rewrite_prompt(request: RewriteRequest, message_type: str) -> str:
 Rewrite this message so it feels premium and clearly stronger than the original.
 
 Detected message type: {message_type}
-Detected intent: {intent}
 Message-type guidance: {message_guidance}
 Tone guidance: {tone_guidance}
 Style guidance: {style_guidance}
@@ -349,7 +282,7 @@ Voice guidance: {VOICE_GUIDANCE}
 Variation guidance: {VARIATION_GUIDANCE}
 
 Rewrite rules:
-{build_quality_rules(message_type, intent)}
+{build_quality_rules(message_type)}
 
 Source message:
 {request.text}
@@ -357,7 +290,6 @@ Source message:
 
 
 def build_action_prompt(request: RewriteRequest, message_type: str, action: str) -> str:
-    intent = detect_intent(request.text)
     message_guidance = MESSAGE_TYPE_GUIDANCE.get(
         message_type,
         "Adapt the message naturally to its use case.",
@@ -372,7 +304,6 @@ def build_action_prompt(request: RewriteRequest, message_type: str, action: str)
 Refine an already strong rewrite.
 
 Detected message type: {message_type}
-Detected intent: {intent}
 Message-type guidance: {message_guidance}
 Tone guidance: {tone_guidance}
 Requested action: {action}
@@ -381,7 +312,7 @@ Voice guidance: {VOICE_GUIDANCE}
 Variation guidance: {VARIATION_GUIDANCE}
 
 Rules:
-{build_quality_rules(message_type, intent)}
+{build_quality_rules(message_type)}
 - Refine the previous output instead of rewriting from scratch.
 - Keep the voice, intent, and general direction of the previous output.
 - Improve quality further. Do not make it flatter, weaker, or more generic.
@@ -498,7 +429,6 @@ def build_retry_prompt(prompt: str) -> str:
         "Make it more concise and direct.\n"
         "Remove weak phrasing and any generic or overly polite language.\n"
         "Improve flow, rhythm, and sentence quality.\n"
-        "Rewrite any awkward phrasing the way a native speaker would naturally say it.\n"
         "Tighten the ending so it feels intentional rather than default.\n"
         "Restructure where useful instead of paraphrasing line by line.\n"
         "Do not become longer unless length is clearly necessary for clarity."
@@ -561,140 +491,18 @@ def request_rewrite(
     raise HTTPException(status_code=502, detail="The AI service could not produce a strong enough rewrite.")
 
 
-def rewrite_with_openai(text: str) -> str:
-    client = get_openai_client()
-    parsed = request_rewrite(
-        client=client,
-        prompt=text,
-        source_text=text,
-        fallback_type="Message",
-    )
-    return parsed["output"]
-
-
-def rewrite_with_openrouter(text: str) -> str:
-    try:
-        api_key = get_openrouter_api_key()
-        payload = {
-            "model": OPENROUTER_MODEL_NAME,
-            "messages": [
-                {
-                    "role": "user",
-                    "content": text,
-                }
-            ],
-            "temperature": 0.7,
-            "max_tokens": 150,
-        }
-
-        response = requests.post(
-            OPENROUTER_API_URL,
-            headers={
-                "Authorization": f"Bearer {api_key}",
-                "Content-Type": "application/json",
-            },
-            json=payload,
-            timeout=10,
-        )
-        data = response.json()
-        print("==== OPENROUTER RESPONSE ====")
-        print(data)
-        print("==== END RESPONSE ====")
-
-        if "error" in data:
-            print("OpenRouter error:", data)
-            print("Provider fallback: OpenAI")
-            return rewrite_with_openai(text)
-
-        if not response.ok:
-            print("OpenRouter error:", data)
-            print("Provider fallback: OpenAI")
-            return rewrite_with_openai(text)
-
-        if "choices" not in data:
-            print("OpenRouter error:", data)
-            print("Provider fallback: OpenAI")
-            return rewrite_with_openai(text)
-
-        choices = data.get("choices") or []
-        if not choices:
-            print("OpenRouter error:", data)
-            print("Provider fallback: OpenAI")
-            return rewrite_with_openai(text)
-
-        message = choices[0].get("message", {})
-        content = message.get("content")
-        if not content:
-            print("OpenRouter error:", data)
-            print("Provider fallback: OpenAI")
-            return rewrite_with_openai(text)
-
-        return content
-    except Exception as e:
-        print("Error:", e)
-        print("Provider fallback: OpenAI")
-        return rewrite_with_openai(text)
-
-
-def request_openrouter_rewrite(
-    prompt: str,
-    source_text: str,
-    fallback_type: str,
-) -> Optional[dict[str, str]]:
-    for retry in (False, True):
-        content = rewrite_with_openrouter(build_retry_prompt(prompt) if retry else prompt)
-        if content in OPENROUTER_ERROR_RESPONSES:
-            return None
-
-        try:
-            parsed = parse_model_output(content, fallback_type)
-        except HTTPException as exc:
-            print("OpenRouter parse error:", exc.detail)
-            return None
-
-        parsed["output"] = apply_micro_polish(parsed["output"])
-        if retry or not needs_stronger_retry(source_text, parsed["output"]):
-            return parsed
-
-    return None
-
-
 @app.post("/rewrite")
 def rewrite_text(request: RewriteRequest):
     prompt, fallback_type, source_for_similarity = build_prompt(request)
-    premium_user = False
 
     try:
-        if premium_user:
-            print("Provider: OpenAI")
-            client = get_openai_client()
-            parsed = request_rewrite(
-                client=client,
-                prompt=prompt,
-                source_text=source_for_similarity,
-                fallback_type=fallback_type,
-            )
-        else:
-            print("Provider: OpenRouter")
-            try:
-                parsed = request_openrouter_rewrite(
-                    prompt=prompt,
-                    source_text=source_for_similarity,
-                    fallback_type=fallback_type,
-                )
-            except Exception as exc:
-                print("Provider fallback: OpenRouter failed", exc)
-                parsed = None
-
-            if parsed is None:
-                print("Provider fallback: OpenAI")
-                client = get_openai_client()
-                parsed = request_rewrite(
-                    client=client,
-                    prompt=prompt,
-                    source_text=source_for_similarity,
-                    fallback_type=fallback_type,
-                )
+        client = get_openai_client()
+        parsed = request_rewrite(
+            client=client,
+            prompt=prompt,
+            source_text=source_for_similarity,
+            fallback_type=fallback_type,
+        )
     except HTTPException:
         raise
     except APITimeoutError as exc:
@@ -707,7 +515,6 @@ def rewrite_text(request: RewriteRequest):
         raise HTTPException(status_code=500, detail="Unexpected server error while rewriting text.") from exc
 
     return {
-        "output": parsed["output"],
         "versions": [
             {
                 "label": "Improved",
