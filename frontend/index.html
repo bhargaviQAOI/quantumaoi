@@ -262,7 +262,7 @@
     .improve-hint,
     .loopback-line {
       color: var(--muted);
-      font-size: 0.84rem;
+      font-size: 0.88rem;
       line-height: 1.45;
     }
 
@@ -290,8 +290,12 @@
       background: rgba(255, 255, 255, 0.075);
       border-color: rgba(118, 187, 255, 0.24);
       box-shadow:
-        0 0 0 5px rgba(118, 187, 255, 0.12),
-        0 18px 40px rgba(0, 0, 0, 0.2);
+        0 0 0 4px rgba(118, 187, 255, 0.09),
+        0 14px 32px rgba(0, 0, 0, 0.17);
+    }
+
+    textarea.filled {
+      animation: fieldFill 220ms ease;
     }
 
     .input-hint {
@@ -305,31 +309,44 @@
       line-height: 1.4;
     }
 
-    .tone-row {
-      display: grid;
-      gap: 8px;
-      margin-top: 18px;
-    }
-
-    .tone-label {
-      color: var(--soft);
-      font-size: 0.78rem;
-      font-weight: 700;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-    }
-
-    .tone-chips {
+    .use-case-row {
       display: flex;
-      flex-wrap: wrap;
+      align-items: center;
       gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+      color: var(--muted);
+      font-size: 0.82rem;
+      line-height: 1.4;
     }
 
-    .tone-chip,
+    .use-case-label {
+      color: rgba(214, 228, 245, 0.76);
+      font-weight: 600;
+    }
+
+    .use-case-chip {
+      min-height: 36px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: rgba(255, 255, 255, 0.04);
+      color: rgba(235, 244, 255, 0.86);
+      font-size: 0.79rem;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .use-case-chip:hover:not(:disabled) {
+      transform: translateY(-1px);
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(126, 240, 214, 0.16);
+      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.16);
+    }
+
+    .use-case-chip,
     .ghost-btn,
-    .mini-btn,
-    .suggestion-chip,
-    .variation-link {
+    .mini-btn {
       position: relative;
       overflow: hidden;
       min-height: 44px;
@@ -341,32 +358,19 @@
       transition: transform var(--ease), background var(--ease), box-shadow var(--ease), border-color var(--ease), opacity var(--ease), color var(--ease);
     }
 
-    .tone-chip {
-      font-size: 0.84rem;
-      color: rgba(232, 242, 255, 0.84);
-      opacity: 0.84;
-    }
-
-    .tone-chip:hover,
+    .use-case-chip:hover:not(:disabled),
     .ghost-btn:hover:not(:disabled),
-    .mini-btn:hover:not(:disabled),
-    .suggestion-chip:hover:not(:disabled),
-    .variation-link:hover:not(:disabled) {
+    .mini-btn:hover:not(:disabled) {
       transform: translateY(-1px);
       background: rgba(255, 255, 255, 0.085);
       box-shadow: 0 12px 26px rgba(0, 0, 0, 0.18);
     }
 
-    .tone-chip.active {
-      opacity: 1;
-      color: #f6fbff;
-      background: rgba(118, 187, 255, 0.1);
-      border-color: rgba(118, 187, 255, 0.22);
+    .use-case-chip:active:not(:disabled) {
+      transform: scale(0.97);
     }
 
-    .ghost-btn,
-    .suggestion-chip,
-    .variation-link {
+    .ghost-btn {
       font-size: 0.84rem;
       font-weight: 600;
     }
@@ -391,6 +395,16 @@
       transition: opacity 260ms ease, transform 260ms ease;
     }
 
+    .composer {
+      transition: opacity 240ms ease, transform 240ms ease, filter 240ms ease;
+    }
+
+    .composer.deemphasized {
+      opacity: 0.68;
+      transform: scale(0.992);
+      filter: saturate(0.85);
+    }
+
     #outputSection {
       scroll-margin-top: 16px;
       scroll-margin-bottom: 96px;
@@ -409,17 +423,38 @@
     }
 
     .output-panel.is-empty .empty-state {
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      display: grid;
+      gap: 12px;
       min-height: 120px;
-      text-align: center;
+      text-align: left;
       color: rgba(220, 233, 251, 0.84);
       font-size: 0.96rem;
       line-height: 1.55;
       border-radius: 20px;
       background: rgba(255, 255, 255, 0.03);
       border: 1px dashed rgba(255, 255, 255, 0.08);
+      padding: 18px;
+    }
+
+    .empty-state-title {
+      color: #f4faff;
+      font-size: 1rem;
+      font-weight: 700;
+      line-height: 1.45;
+      white-space: pre-line;
+    }
+
+    .empty-state-preview {
+      display: grid;
+      gap: 6px;
+      color: rgba(202, 218, 238, 0.78);
+      font-size: 0.82rem;
+      line-height: 1.45;
+    }
+
+    .empty-state-preview strong {
+      color: rgba(238, 245, 255, 0.9);
+      font-weight: 600;
     }
 
     .speed-note {
@@ -456,13 +491,15 @@
 
     .result-block.primary {
       border-color: var(--border-strong);
+      padding: 24px 22px;
       background:
         linear-gradient(180deg, rgba(126, 240, 214, 0.06), rgba(255, 255, 255, 0.04) 32%, rgba(255, 255, 255, 0.03)),
         rgba(255, 255, 255, 0.04);
       box-shadow:
         inset 0 1px 0 rgba(255, 255, 255, 0.05),
         0 0 0 1px rgba(126, 240, 214, 0.05),
-        0 18px 36px rgba(0, 0, 0, 0.16);
+        0 18px 36px rgba(0, 0, 0, 0.16),
+        0 0 36px rgba(126, 240, 214, 0.08);
     }
 
     .result-block.primary::after {
@@ -496,7 +533,7 @@
       display: block;
       margin-bottom: 14px;
       color: #f9fcff;
-      font-size: 1rem;
+      font-size: 1.02rem;
       font-weight: 700;
       letter-spacing: -0.02em;
     }
@@ -511,11 +548,15 @@
 
     .result-copy.emphasized {
       color: #ffffff;
-      font-size: 1.14rem;
-      line-height: 1.9;
+      font-size: 1.22rem;
+      line-height: 1.96;
       letter-spacing: -0.015em;
       text-wrap: pretty;
-      text-shadow: 0 0 22px rgba(118, 187, 255, 0.08);
+      text-shadow: 0 0 24px rgba(118, 187, 255, 0.1);
+    }
+
+    .tappable-output {
+      cursor: pointer;
     }
 
     .result-copy.reveal {
@@ -555,8 +596,7 @@
       white-space: nowrap;
     }
 
-    .result-meta,
-    .result-tools {
+    .result-meta {
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -571,20 +611,6 @@
       line-height: 1.45;
     }
 
-    .variation-link {
-      padding-inline: 0;
-      min-height: auto;
-      border: 0;
-      background: transparent;
-      color: #d6e8ff;
-      font-weight: 600;
-    }
-
-    .variation-link.loading {
-      color: #f5fbff;
-      text-shadow: 0 0 18px rgba(126, 240, 214, 0.22);
-    }
-
     .shimmer {
       position: relative;
       overflow: hidden;
@@ -592,8 +618,7 @@
     }
 
     .shimmer::after,
-    .mini-btn.loading::after,
-    .suggestion-chip.loading::after {
+    .mini-btn.loading::after {
       content: "";
       position: absolute;
       inset: 0;
@@ -611,13 +636,6 @@
       display: grid;
     }
 
-    .improve-title {
-      font-size: 1rem;
-      font-weight: 700;
-      color: #f6fbff;
-    }
-
-    .suggestion-row,
     .improve-actions {
       display: flex;
       width: 100%;
@@ -633,25 +651,21 @@
       -ms-overflow-style: none;
     }
 
-    .suggestion-row::after,
     .improve-actions::after {
       content: "";
       flex: 0 0 16px;
     }
 
-    .suggestion-row::-webkit-scrollbar,
     .improve-actions::-webkit-scrollbar {
       display: none;
     }
 
-    .mini-btn,
-    .suggestion-chip {
+    .mini-btn {
       flex: 0 0 auto;
       white-space: nowrap;
     }
 
-    .improve-actions button,
-    .suggestion-row button {
+    .improve-actions button {
       flex: 0 0 auto;
       white-space: nowrap;
     }
@@ -665,14 +679,11 @@
     }
 
     .mini-btn:active:not(:disabled),
-    .mini-btn.pressing,
-    .suggestion-chip:active:not(:disabled),
-    .suggestion-chip.pressing {
+    .mini-btn.pressing {
       transform: scale(0.97);
     }
 
-    .mini-btn.loading,
-    .suggestion-chip.loading {
+    .mini-btn.loading {
       border-color: rgba(118, 187, 255, 0.22);
       box-shadow:
         0 0 0 1px rgba(118, 187, 255, 0.08),
@@ -689,11 +700,29 @@
       background: linear-gradient(180deg, rgba(7, 16, 28, 0), rgba(7, 16, 28, 0.88) 35%, rgba(7, 16, 28, 0.98));
       backdrop-filter: blur(14px);
       -webkit-backdrop-filter: blur(14px);
+      box-shadow: 0 -18px 40px rgba(0, 0, 0, 0.24);
     }
 
     .cta-inner {
       max-width: 600px;
       margin: 0 auto;
+    }
+
+    .cta-meta {
+      display: grid;
+      gap: 8px;
+    }
+
+    .speed-indicator,
+    .cta-support {
+      text-align: center;
+      color: rgba(215, 228, 245, 0.82);
+      font-size: 0.82rem;
+      line-height: 1.4;
+    }
+
+    .cta-support {
+      color: rgba(190, 207, 229, 0.8);
     }
 
     .primary-btn {
@@ -815,6 +844,17 @@
       }
     }
 
+    @keyframes fieldFill {
+      from {
+        opacity: 0.82;
+        transform: translateY(2px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
     @media (min-width: 768px) {
       .app-shell {
         padding: 24px 20px calc(116px + env(safe-area-inset-bottom));
@@ -856,32 +896,29 @@
     <section class="hero">
       <div class="hero-kicker">QuantumAOI Studio</div>
       <h1>Say it better, instantly</h1>
-      <p class="subtitle">Write better emails, LinkedIn messages, and follow-ups in seconds.</p>
+      <p class="subtitle">Make any message sound clear, natural, and ready to send.</p>
     </section>
 
     <section class="stack">
       <section class="panel composer">
         <div class="section-inner">
           <div class="field-header">
-            <label for="inputText">Your draft</label>
-            <span class="field-note">Paste the raw version. QuantumAOI handles the polish.</span>
+            <label for="inputText">Your message</label>
+            <span class="field-note">Paste your message here</span>
           </div>
 
-          <textarea id="inputText" placeholder="Paste your message..."></textarea>
-          <div class="input-hint">Write your message in any way - we'll make it clear.</div>
-
-          <div class="tone-row">
-            <div class="tone-label">Tone</div>
-            <div class="tone-chips">
-              <button class="tone-chip active" type="button" data-tone="Professional" onclick="setTone('Professional', this)">Professional</button>
-              <button class="tone-chip" type="button" data-tone="Friendly" onclick="setTone('Friendly', this)">Friendly</button>
-              <button class="tone-chip" type="button" data-tone="Confident" onclick="setTone('Confident', this)">Confident</button>
-              <button class="tone-chip" type="button" data-tone="Polite" onclick="setTone('Polite', this)">Polite</button>
-            </div>
+          <textarea id="inputText" placeholder="e.g. i cant come today"></textarea>
+          <div class="input-hint">Say it any way — we’ll make it sound right</div>
+          <div class="use-case-row">
+            <span class="use-case-label">Try this:</span>
+            <button class="use-case-chip" type="button" onclick="applyUseCase('job')">Job message</button>
+            <button class="use-case-chip" type="button" onclick="applyUseCase('sales')">Sales pitch</button>
+            <button class="use-case-chip" type="button" onclick="applyUseCase('teacher')">Teacher reply</button>
+            <button class="use-case-chip" type="button" onclick="applyUseCase('chat')">Quick chat</button>
           </div>
 
-          <div class="trust-copy">Used for emails, LinkedIn, and job applications</div>
-          <div class="differentiator">Built specifically for real-world messages, not generic AI responses.</div>
+          <div class="differentiator">Don't worry about grammar - we'll fix it</div>
+          <div class="trust-copy">Used for chats, emails, and everyday messages</div>
         </div>
       </section>
 
@@ -889,14 +926,18 @@
         <div class="section-inner">
           <div class="output-head">
             <div>
-              <h2 class="output-title">Output</h2>
-              <div class="output-subtitle">Optimized for professional communication</div>
+              <h2 class="output-title">Your improved message</h2>
             </div>
             <button id="copyBtn" class="ghost-btn hidden" type="button" onclick="copyText()">Copy</button>
           </div>
 
-          <div id="speedNote" class="speed-note">~1.2s response time</div>
-          <div id="emptyState" class="empty-state">Paste a message and tap Fix it.</div>
+          <div id="emptyState" class="empty-state">
+            <div class="empty-state-title">✨ Your message will be rewritten here — ready to send</div>
+            <div class="empty-state-preview">
+              <div><strong>Before:</strong> i cant come today</div>
+              <div><strong>After:</strong> I won’t be able to come today.</div>
+            </div>
+          </div>
 
           <div id="outputShell" class="output-shell">
             <div id="outputCard" class="output-card">
@@ -908,8 +949,8 @@
 
                 <div id="afterCard" class="result-block primary">
                   <div id="detectedLabel" class="detected-label hidden"></div>
-                  <span class="human-heading">✨ This sounds like you at your best</span>
-                  <p id="output" class="result-copy emphasized" aria-live="polite"></p>
+                  <span class="human-heading">✨ Here's a clearer, more confident version</span>
+                  <p id="output" class="result-copy emphasized tappable-output" aria-live="polite" role="button" tabindex="0" title="Tap to copy"></p>
                   <div id="microFeedback" class="micro-feedback hidden"></div>
                   <div id="clarityIndicators" class="clarity-indicators hidden">
                     <span>✔ Clear</span>
@@ -920,25 +961,17 @@
                     <div id="confidenceLine" class="confidence-line hidden">✅ Sounds more natural and professional</div>
                     <button id="copyInlineBtn" class="ghost-btn inline-copy-btn hidden" type="button" onclick="copyText()">Copy</button>
                   </div>
-                  <div class="result-tools">
-                    <button id="variationBtn" class="variation-link hidden" type="button" onclick="tryAnotherVersion()">Try another version</button>
-                    <div id="loopbackLine" class="loopback-line hidden">Paste another message when you're ready.</div>
-                  </div>
                 </div>
 
                 <div id="improveSection" class="improve-section">
-                  <div class="refine-prompt">Make it even sharper</div>
-                  <div class="improve-title">Improve further</div>
-                  <div id="suggestionRow" class="suggestion-row"></div>
+                  <div class="improve-title">✨ Refine it</div>
                   <div class="improve-actions">
                     <button class="mini-btn" type="button" onclick="improveAgain('short')">Shorter</button>
                     <button class="mini-btn" type="button" onclick="improveAgain('friendly')">Friendlier</button>
                     <button class="mini-btn" type="button" onclick="improveAgain('confident')">Stronger</button>
                     <button class="mini-btn" type="button" onclick="improveAgain('technical')">Technical</button>
                     <button class="mini-btn" type="button" onclick="improveAgain('simple')">Simple</button>
-                    <button class="mini-btn" type="button" onclick="improveAgain('polite')">Polite</button>
                   </div>
-                  <div class="improve-hint">Refine it further.</div>
                 </div>
               </div>
             </div>
@@ -950,10 +983,13 @@
 
   <div class="cta-wrap">
     <div class="cta-inner">
-      <button id="rewriteBtn" class="primary-btn" type="button" onclick="rewriteText()">
-        <span class="spinner" aria-hidden="true"></span>
-        <span id="rewriteBtnLabel">✨ Fix it</span>
-      </button>
+      <div class="cta-meta">
+        <button id="rewriteBtn" class="primary-btn" type="button" onclick="handlePrimaryAction()">
+          <span class="spinner" aria-hidden="true"></span>
+          <span id="rewriteBtnLabel">✨ Improve my message</span>
+        </button>
+        <div class="cta-support">Clearer. More confident. Natural.</div>
+      </div>
     </div>
   </div>
 
@@ -974,11 +1010,9 @@
     const copyInlineBtn = document.getElementById("copyInlineBtn");
     const microFeedback = document.getElementById("microFeedback");
     const clarityIndicators = document.getElementById("clarityIndicators");
-    const variationBtn = document.getElementById("variationBtn");
-    const loopbackLine = document.getElementById("loopbackLine");
-    const suggestionRow = document.getElementById("suggestionRow");
     const outputSection = document.getElementById("outputSection");
     const inputHint = document.querySelector(".input-hint");
+    const composer = document.querySelector(".composer");
 
     const API_BASE_URL = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
       ? "http://127.0.0.1:8000"
@@ -995,8 +1029,11 @@
     let currentOutput = "";
     let lastSourceText = "";
     let variationIndex = 0;
-    const DEFAULT_INPUT_HINT = "Write your message in any way - we'll make it clear.";
-    const TECHNICAL_INPUT_HINT = "Write your message in any way - we'll make it clear.  💡 Make this more technical?";
+    const DEFAULT_INPUT_HINT = "Say it any way — we’ll make it sound right";
+    const TECHNICAL_INPUT_HINT = "Say it any way — we’ll make it sound right  💡 Make this more technical?";
+    const SUGGESTION_HINT = "Tap 'Improve my message' to see the result";
+    const PRIMARY_CTA_LABEL = "✨ Improve my message";
+    const SECONDARY_CTA_LABEL = "✨ Improve again";
 
     function setLoadingState(isLoading) {
       rewriteBtn.disabled = isLoading;
@@ -1004,11 +1041,12 @@
       copyBtn.disabled = isLoading;
       copyInlineBtn.disabled = isLoading;
       rewriteBtn.classList.toggle("loading", isLoading);
-      rewriteBtnLabel.textContent = isLoading ? "Fixing..." : "✨ Fix it";
+      rewriteBtnLabel.textContent = isLoading ? "Improving..." : (currentOutput ? SECONDARY_CTA_LABEL : PRIMARY_CTA_LABEL);
     }
 
     function showResults() {
       outputSection.classList.remove("is-empty");
+      composer.classList.add("deemphasized");
       emptyState.classList.add("hidden");
       resultStack.classList.remove("hidden");
       requestAnimationFrame(() => {
@@ -1016,9 +1054,8 @@
       });
       copyBtn.classList.remove("hidden");
       copyInlineBtn.classList.remove("hidden");
-      variationBtn.classList.remove("hidden");
       improveSection.classList.add("visible");
-      loopbackLine.classList.remove("hidden");
+      rewriteBtnLabel.textContent = SECONDARY_CTA_LABEL;
     }
 
     function showEmptyState() {
@@ -1028,14 +1065,16 @@
       resultStack.classList.remove("visible");
       copyBtn.classList.add("hidden");
       copyInlineBtn.classList.add("hidden");
-      variationBtn.classList.add("hidden");
       improveSection.classList.remove("visible");
       detectedLabel.classList.add("hidden");
       confidenceLine.classList.add("hidden");
       microFeedback.classList.add("hidden");
       clarityIndicators.classList.add("hidden");
-      loopbackLine.classList.add("hidden");
-      suggestionRow.innerHTML = "";
+      composer.classList.remove("deemphasized");
+      currentOutput = "";
+      lastSourceText = "";
+      variationIndex = 0;
+      rewriteBtnLabel.textContent = PRIMARY_CTA_LABEL;
     }
 
     function clearTypingAnimation() {
@@ -1102,31 +1141,21 @@
       setTimeout(() => button.classList.remove("loading"), 850);
     }
 
-    function animateSuggestionChip(chip) {
-      if (!chip) {
-        return;
-      }
-      chip.classList.add("pressing");
-      chip.classList.add("loading");
-      setTimeout(() => chip.classList.remove("pressing"), 130);
-      setTimeout(() => chip.classList.remove("loading"), 850);
-    }
-
     function detectMessageType(text) {
       const lower = text.toLowerCase();
       if (lower.includes("follow up") || lower.includes("following up") || lower.includes("update")) {
-        return "Detected: Follow-up / thoughtful check-in";
+        return "Tone: Follow-up & thoughtful";
       }
       if (lower.includes("sorry") || lower.includes("apolog")) {
-        return "Detected: Apology / repair message";
+        return "Tone: Apologetic & thoughtful";
       }
       if (lower.includes("hey") || lower.includes("hi ") || lower.includes("thanks")) {
-        return "Detected: Informal / slightly bold tone";
+        return "Tone: Casual & natural";
       }
       if (lower.includes("please") || lower.includes("request") || lower.includes("application")) {
-        return "Detected: Professional / respectful request";
+        return "Tone: Professional & respectful";
       }
-      return "Detected: Clear professional message";
+      return "Tone: Professional & clear";
     }
 
     function getConfidenceLine(tone) {
@@ -1149,6 +1178,25 @@
 
     function updateInputHint(text) {
       inputHint.textContent = looksTechnical(text) ? TECHNICAL_INPUT_HINT : DEFAULT_INPUT_HINT;
+    }
+
+    function applyUseCase(type) {
+      const suggestions = {
+        job: "Hi, I'm following up on my application and wanted to check if there are any updates.",
+        sales: "Hi, I wanted to reach out because I think this could be useful for your team.",
+        teacher: "Hello, thank you for your message. I wanted to reply clearly and respectfully.",
+        chat: "Hey, just wanted to check in and see if you're free later."
+      };
+
+      inputText.value = suggestions[type] || inputText.value;
+      inputHint.textContent = SUGGESTION_HINT;
+      inputText.classList.remove("filled");
+      void inputText.offsetWidth;
+      inputText.classList.add("filled");
+      setTimeout(() => {
+        inputText.classList.remove("filled");
+      }, 220);
+      inputText.focus();
     }
 
     function polishRewrite(sourceText, rewrittenText) {
@@ -1190,13 +1238,6 @@
         tone,
         style
       };
-    }
-
-    function setTone(tone, button) {
-      selectedTone = tone;
-      document.querySelectorAll(".tone-chip").forEach((chip) => {
-        chip.classList.toggle("active", chip === button);
-      });
     }
 
     function createTimeoutController(timeoutMs) {
@@ -1277,9 +1318,6 @@
       if (style === "simple") {
         feedbacks.push("Easier to understand");
       }
-      if (style === "polite" || tone === "Polite") {
-        feedbacks.push("More polite and respectful");
-      }
       if (!feedbacks.length) {
         feedbacks.push("Cleaner flow and stronger wording");
       }
@@ -1289,76 +1327,31 @@
       clarityIndicators.classList.remove("hidden");
     }
 
-    function getSuggestionConfigs(sourceText) {
-      const lower = sourceText.toLowerCase();
-      const suggestions = [];
-
-      if (selectedTone !== "Confident") {
-        suggestions.push({
-          label: "Make it more direct",
-          style: "confident",
-          tone: "Confident"
-        });
-      }
-
-      if (selectedTone !== "Friendly") {
-        suggestions.push({
-          label: "Make it warmer",
-          style: "friendly",
-          tone: "Friendly"
-        });
-      }
-
-      if (selectedTone !== "Professional") {
-        suggestions.push({
-          label: "Polish for work",
-          style: "default",
-          tone: "Professional"
-        });
-      }
-
-      if (looksTechnical(sourceText)) {
-        suggestions.push({
-          label: "Make it technical",
-          style: "technical",
-          tone: "Professional"
-        });
-      }
-
-      if (!lower.includes("follow up") && !lower.includes("following up")) {
-        suggestions.push({
-          label: "Turn into follow-up",
-          style: "short",
-          tone: "Professional",
-          transformText: (text) => `Follow up on this message: ${text}`
-        });
-      }
-
-      suggestions.push({
-        label: "Make it simpler",
-        style: "short",
-        tone: "Polite",
-        feedbackStyle: "simple"
-      });
-
-      return suggestions.slice(0, 2);
+    function getVariantConfig() {
+      const variants = [
+        { style: "default", tone: "Professional" },
+        { style: "confident", tone: "Confident" },
+        { style: "friendly", tone: "Friendly" },
+        { style: "short", tone: "Professional" },
+        { style: "technical", tone: "Professional" }
+      ];
+      variationIndex = (variationIndex + 1) % variants.length;
+      return variants[variationIndex];
     }
 
-    function renderSuggestions(sourceText) {
-      const suggestions = getSuggestionConfigs(sourceText);
-      suggestionRow.innerHTML = "";
-
-      suggestions.forEach((suggestion) => {
-        const chip = document.createElement("button");
-        chip.type = "button";
-        chip.className = "suggestion-chip";
-        chip.textContent = suggestion.label;
-        chip.addEventListener("click", () => {
-          animateSuggestionChip(chip);
-          applySuggestion(suggestion);
+    function handlePrimaryAction() {
+      if (currentOutput && lastSourceText) {
+        const variant = getVariantConfig();
+        rewriteText({
+          text: lastSourceText,
+          style: variant.style,
+          tone: variant.tone,
+          feedbackStyle: variant.style
         });
-        suggestionRow.appendChild(chip);
-      });
+        return;
+      }
+
+      rewriteText();
     }
 
     async function rewriteText(override = {}) {
@@ -1390,7 +1383,6 @@
       output.textContent = "";
       afterCard.classList.add("shimmer");
       afterCard.classList.add("preparing");
-      variationBtn.classList.add("loading");
 
       try {
         const rewritten = await requestRewrite(buildPayload(sourceText, style, tone, context), currentRequestId);
@@ -1406,7 +1398,6 @@
           typeText(polishedRewrite);
           confidenceLine.classList.remove("hidden");
           setMicroFeedback(sourceText, polishedRewrite, tone, feedbackStyle);
-          renderSuggestions(sourceText);
           triggerOutputFlash();
           scrollToOutput();
         }, 180);
@@ -1421,7 +1412,6 @@
         microFeedback.classList.add("hidden");
         output.textContent = error.message || "Something went wrong. Please try again.";
       } finally {
-        variationBtn.classList.remove("loading");
         setLoadingState(false);
       }
     }
@@ -1432,8 +1422,7 @@
         friendly: { style: "friendly", tone: "Friendly" },
         confident: { style: "confident", tone: "Confident" },
         technical: { style: "technical", tone: "Professional" },
-        simple: { style: "short", tone: "Polite" },
-        polite: { style: "default", tone: "Polite" }
+        simple: { style: "short", tone: "Polite" }
       };
       return configs[style] || { style: DEFAULT_STYLE, tone: selectedTone };
     }
@@ -1449,36 +1438,6 @@
       rewriteText({ text: sourceText, style: config.style, tone: config.tone, feedbackStyle: style });
     }
 
-    function tryAnotherVersion() {
-      if (!lastSourceText) {
-        return;
-      }
-
-      const variants = [
-        { style: "confident", tone: "Confident" },
-        { style: "friendly", tone: "Friendly" },
-        { style: "short", tone: selectedTone },
-        { style: "default", tone: selectedTone }
-      ];
-      variationIndex = (variationIndex + 1) % variants.length;
-      const variant = variants[variationIndex];
-      rewriteText({ text: lastSourceText, style: variant.style, tone: variant.tone });
-    }
-
-    function applySuggestion(suggestion) {
-      const nextText = typeof suggestion.transformText === "function"
-        ? suggestion.transformText(lastSourceText || inputText.value.trim())
-        : (lastSourceText || inputText.value.trim());
-
-      rewriteText({
-        text: nextText,
-        style: suggestion.style || DEFAULT_STYLE,
-        tone: suggestion.tone || selectedTone,
-        context: suggestion.context || DEFAULT_CONTEXT,
-        feedbackStyle: suggestion.feedbackStyle || suggestion.style || DEFAULT_STYLE
-      });
-    }
-
     async function copyText() {
       const text = currentOutput || output.textContent.trim();
       if (!text) {
@@ -1487,12 +1446,18 @@
 
       try {
         await navigator.clipboard.writeText(text);
+        copyBtn.classList.add("pressing");
+        copyInlineBtn.classList.add("pressing");
         copyBtn.classList.remove("ready");
         copyInlineBtn.classList.remove("ready");
         copyBtn.classList.add("copied");
         copyInlineBtn.classList.add("copied");
-        copyBtn.textContent = "Copied ✓";
-        copyInlineBtn.textContent = "Copied ✓";
+        copyBtn.textContent = "Copied ✓ Ready to send";
+        copyInlineBtn.textContent = "Copied ✓ Ready to send";
+        setTimeout(() => {
+          copyBtn.classList.remove("pressing");
+          copyInlineBtn.classList.remove("pressing");
+        }, 130);
         setTimeout(() => {
           copyBtn.classList.remove("copied");
           copyInlineBtn.classList.remove("copied");
@@ -1525,6 +1490,17 @@
 
     inputText.addEventListener("input", (e) => {
       updateInputHint(e.target.value);
+    });
+
+    output.addEventListener("click", () => {
+      copyText();
+    });
+
+    output.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        copyText();
+      }
     });
 
     window.onload = () => {
