@@ -266,10 +266,18 @@
       line-height: 1.45;
     }
 
+    .textarea-wrap {
+      position: relative;
+      isolation: isolate;
+      overflow: visible;
+    }
+
     textarea {
+      position: relative;
+      z-index: 1;
       width: 100%;
       min-height: 120px;
-      padding: 16px;
+      padding: 16px 56px 16px 16px;
       resize: vertical;
       border-radius: 20px;
       border: 1px solid rgba(118, 187, 255, 0.14);
@@ -300,6 +308,40 @@
 
     .input-hint {
       margin-top: 10px;
+    }
+
+    .clear-input-btn {
+      position: absolute;
+      top: 14px;
+      right: 16px;
+      z-index: 3;
+      width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      background: rgba(18, 28, 44, 0.92);
+      color: #f5fbff;
+      font-size: 0.9rem;
+      font-weight: 700;
+      appearance: none;
+      -webkit-appearance: none;
+      line-height: 1;
+      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.24);
+      transition: transform var(--ease), background var(--ease), color var(--ease), border-color var(--ease);
+    }
+
+    .clear-input-btn:hover:not(:disabled) {
+      transform: translateY(-1px);
+      background: rgba(28, 41, 62, 0.98);
+      border-color: rgba(126, 240, 214, 0.24);
+      color: #ffffff;
+    }
+
+    .clear-input-btn:active:not(:disabled) {
+      transform: scale(0.96);
     }
 
     .technical-hint {
@@ -368,6 +410,13 @@
 
     .use-case-chip:active:not(:disabled) {
       transform: scale(0.97);
+    }
+
+    .use-case-chip.active {
+      color: #f8fcff;
+      background: rgba(118, 187, 255, 0.12);
+      border-color: rgba(118, 187, 255, 0.22);
+      box-shadow: 0 10px 22px rgba(55, 115, 184, 0.16);
     }
 
     .ghost-btn {
@@ -519,6 +568,18 @@
         0 18px 36px rgba(0, 0, 0, 0.18);
     }
 
+    .result-block.primary.limit-warning {
+      border-color: rgba(255, 208, 122, 0.34);
+      background:
+        linear-gradient(180deg, rgba(255, 208, 122, 0.14), rgba(255, 255, 255, 0.04) 36%, rgba(255, 255, 255, 0.03)),
+        rgba(255, 255, 255, 0.04);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.05),
+        0 0 0 1px rgba(255, 208, 122, 0.08),
+        0 18px 36px rgba(0, 0, 0, 0.16),
+        0 0 32px rgba(255, 208, 122, 0.12);
+    }
+
     .result-label {
       display: block;
       margin-bottom: 8px;
@@ -555,6 +616,11 @@
       text-shadow: 0 0 24px rgba(118, 187, 255, 0.1);
     }
 
+    .result-copy.limit-text {
+      color: #fff2cd;
+      text-shadow: none;
+    }
+
     .tappable-output {
       cursor: pointer;
     }
@@ -579,6 +645,197 @@
       margin-top: 10px;
       color: rgba(201, 248, 231, 0.88);
       font-size: 0.82rem;
+      line-height: 1.45;
+    }
+
+    .upgrade-hint {
+      margin-top: 14px;
+      padding: 12px 14px;
+      border-radius: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(255, 255, 255, 0.05);
+      color: rgba(243, 248, 255, 0.84);
+      font-size: 0.86rem;
+      line-height: 1.55;
+    }
+
+    .upgrade-hint.limit-active {
+      border-color: rgba(255, 208, 122, 0.26);
+      background:
+        linear-gradient(180deg, rgba(255, 208, 122, 0.16), rgba(255, 208, 122, 0.08)),
+        rgba(255, 208, 122, 0.1);
+      color: #fff2cd;
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.06),
+        0 0 0 1px rgba(255, 208, 122, 0.08),
+        0 12px 28px rgba(255, 208, 122, 0.08);
+    }
+
+    .upgrade-note {
+      margin-top: 12px;
+      color: rgba(255, 235, 194, 0.88);
+      font-size: 0.88rem;
+      line-height: 1.55;
+    }
+
+    .upgrade-cta {
+      margin-top: 14px;
+      width: 100%;
+      min-height: 48px;
+      border-radius: 16px;
+      border: 1px solid rgba(255, 208, 122, 0.26);
+      background: linear-gradient(135deg, rgba(255, 234, 187, 0.96), rgba(255, 208, 122, 0.94));
+      color: #2a1700;
+      font-size: 0.95rem;
+      font-weight: 800;
+      box-shadow:
+        0 16px 30px rgba(255, 208, 122, 0.14),
+        inset 0 1px 0 rgba(255, 255, 255, 0.48);
+    }
+
+    .upgrade-cta:hover {
+      transform: translateY(-1px);
+      box-shadow:
+        0 20px 36px rgba(255, 208, 122, 0.18),
+        0 0 0 6px rgba(255, 208, 122, 0.08);
+    }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 40;
+      display: grid;
+      place-items: center;
+      padding: 20px;
+      background: rgba(4, 10, 18, 0.72);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+
+    .upgrade-modal {
+      width: min(100%, 440px);
+      border-radius: 24px;
+      border: 1px solid rgba(255, 208, 122, 0.18);
+      background:
+        linear-gradient(180deg, rgba(255, 208, 122, 0.1), rgba(255, 255, 255, 0.04) 28%, rgba(10, 22, 38, 0.98)),
+        rgba(10, 22, 38, 0.98);
+      box-shadow:
+        0 30px 60px rgba(0, 0, 0, 0.34),
+        0 0 0 1px rgba(255, 208, 122, 0.08),
+        0 0 48px rgba(255, 208, 122, 0.08);
+      padding: 24px;
+    }
+
+    .modal-kicker {
+      color: rgba(255, 229, 184, 0.78);
+      font-size: 0.76rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .upgrade-modal h3 {
+      margin: 10px 0 8px;
+      color: #fff8ee;
+      font-size: 1.42rem;
+      line-height: 1.2;
+      letter-spacing: -0.03em;
+    }
+
+    .modal-copy {
+      margin: 0 0 18px;
+      color: rgba(233, 243, 255, 0.78);
+      font-size: 0.96rem;
+      line-height: 1.6;
+    }
+
+    .pricing-grid {
+      display: grid;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .price-card {
+      border-radius: 18px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(255, 255, 255, 0.04);
+      padding: 16px;
+    }
+
+    .price-card-pro {
+      border-color: rgba(255, 208, 122, 0.22);
+      background:
+        linear-gradient(180deg, rgba(255, 208, 122, 0.12), rgba(255, 255, 255, 0.04)),
+        rgba(255, 255, 255, 0.04);
+      box-shadow:
+        0 0 0 1px rgba(255, 208, 122, 0.08),
+        0 18px 34px rgba(255, 208, 122, 0.1),
+        0 0 40px rgba(255, 208, 122, 0.08);
+      transform: scale(1.02);
+    }
+
+    .price-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 10px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(255, 208, 122, 0.14);
+      color: #fff0cb;
+      font-size: 0.74rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+    }
+
+    .price-label {
+      color: rgba(215, 228, 245, 0.72);
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .price-value {
+      margin-top: 6px;
+      color: #fffaf2;
+      font-size: 1.12rem;
+      font-weight: 800;
+    }
+
+    .price-feature {
+      margin-top: 8px;
+      color: rgba(243, 248, 255, 0.82);
+      font-size: 0.9rem;
+      line-height: 1.45;
+    }
+
+    .modal-upgrade-btn {
+      margin-top: 0;
+    }
+
+    .modal-close {
+      margin-left: auto;
+      display: block;
+      border: 0;
+      background: transparent;
+      color: rgba(233, 243, 255, 0.5);
+      font-size: 0.74rem;
+      font-weight: 500;
+    }
+
+    .trust-line {
+      margin-top: 12px;
+      text-align: center;
+      color: rgba(233, 243, 255, 0.62);
+      font-size: 0.8rem;
+      line-height: 1.4;
+    }
+
+    .usage-indicator {
+      margin-top: 10px;
+      color: rgba(214, 228, 245, 0.72);
+      font-size: 0.8rem;
       line-height: 1.45;
     }
 
@@ -688,6 +945,13 @@
       box-shadow:
         0 0 0 1px rgba(118, 187, 255, 0.08),
         0 0 18px rgba(118, 187, 255, 0.12);
+    }
+
+    .mini-btn.is-locked {
+      opacity: 0.48;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
     }
 
     .cta-wrap {
@@ -907,14 +1171,17 @@
             <span class="field-note">Paste your message here</span>
           </div>
 
-          <textarea id="inputText" placeholder="e.g. i cant come today"></textarea>
-          <div class="input-hint">Say it any way — we’ll make it sound right</div>
+          <div class="textarea-wrap">
+            <textarea id="inputText" data-testid="message-input" placeholder="e.g. i cant come today"></textarea>
+            <button id="clearInputBtn" class="clear-input-btn" type="button" aria-label="Clear message" onclick="clearInput()" hidden>✕</button>
+          </div>
+          <div class="input-hint">Write anything — even broken English</div>
           <div class="use-case-row">
             <span class="use-case-label">Try this:</span>
-            <button class="use-case-chip" type="button" onclick="applyUseCase('job')">Job message</button>
-            <button class="use-case-chip" type="button" onclick="applyUseCase('sales')">Sales pitch</button>
-            <button class="use-case-chip" type="button" onclick="applyUseCase('teacher')">Teacher reply</button>
-            <button class="use-case-chip" type="button" onclick="applyUseCase('chat')">Quick chat</button>
+            <button class="use-case-chip" data-use-case="job" type="button" onclick="applyUseCase('job')">Job message</button>
+            <button class="use-case-chip" data-use-case="sales" type="button" onclick="applyUseCase('sales')">Sales pitch</button>
+            <button class="use-case-chip" data-use-case="teacher" type="button" onclick="applyUseCase('teacher')">Teacher reply</button>
+            <button class="use-case-chip" data-use-case="chat" type="button" onclick="applyUseCase('chat')">Quick chat</button>
           </div>
 
           <div class="differentiator">Don't worry about grammar - we'll fix it</div>
@@ -922,7 +1189,7 @@
         </div>
       </section>
 
-      <section id="outputSection" class="panel output-panel is-empty">
+      <section id="outputSection" data-testid="output-section" class="panel output-panel is-empty">
         <div class="section-inner">
           <div class="output-head">
             <div>
@@ -931,7 +1198,7 @@
             <button id="copyBtn" class="ghost-btn hidden" type="button" onclick="copyText()">Copy</button>
           </div>
 
-          <div id="emptyState" class="empty-state">
+          <div id="emptyState" data-testid="empty-state" class="empty-state">
             <div class="empty-state-title">✨ Your message will be rewritten here — ready to send</div>
             <div class="empty-state-preview">
               <div><strong>Before:</strong> i cant come today</div>
@@ -941,17 +1208,22 @@
 
           <div id="outputShell" class="output-shell">
             <div id="outputCard" class="output-card">
-              <div id="resultStack" class="result-stack hidden">
+              <div id="resultStack" data-testid="result-stack" class="result-stack hidden">
                 <div class="result-block">
                   <span class="result-label">Your message</span>
                   <p id="beforeText" class="result-copy"></p>
                 </div>
 
                 <div id="afterCard" class="result-block primary">
-                  <div id="detectedLabel" class="detected-label hidden"></div>
-                  <span class="human-heading">✨ Here's a clearer, more confident version</span>
-                  <p id="output" class="result-copy emphasized tappable-output" aria-live="polite" role="button" tabindex="0" title="Tap to copy"></p>
+                  <div id="detectedLabel" data-testid="detected-label" class="detected-label hidden"></div>
+                  <span id="resultHeading" class="human-heading">✨ Here's a clearer, more confident version</span>
+                  <p id="output" data-testid="output" class="result-copy emphasized tappable-output" aria-live="polite" role="button" tabindex="0" title="Tap to copy"></p>
+                  <div id="limitStateNote" data-testid="status-note" class="upgrade-note hidden">You’ve reached today’s limit
+Come back tomorrow — or unlock unlimited access ✨</div>
                   <div id="microFeedback" class="micro-feedback hidden"></div>
+                  <div id="usageIndicator" class="usage-indicator hidden"></div>
+                  <div id="upgradeHint" class="upgrade-hint hidden">✨ Upgrade for unlimited rewrites, better tone control, and faster results</div>
+                  <button id="upgradeNowBtn" class="upgrade-cta hidden" type="button" onclick="handleUpgradeClick()">✨ Upgrade now</button>
                   <div id="clarityIndicators" class="clarity-indicators hidden">
                     <span>✔ Clear</span>
                     <span>✔ Polite</span>
@@ -966,12 +1238,13 @@
                 <div id="improveSection" class="improve-section">
                   <div class="improve-title">✨ Refine it</div>
                   <div class="improve-actions">
-                    <button class="mini-btn" type="button" onclick="improveAgain('short')">Shorter</button>
-                    <button class="mini-btn" type="button" onclick="improveAgain('friendly')">Friendlier</button>
-                    <button class="mini-btn" type="button" onclick="improveAgain('confident')">Stronger</button>
-                    <button class="mini-btn" type="button" onclick="improveAgain('technical')">Technical</button>
-                    <button class="mini-btn" type="button" onclick="improveAgain('simple')">Simple</button>
+                    <button class="mini-btn" data-testid="action-shorten" type="button" onclick="improveAgain('short')">Shorter</button>
+                    <button class="mini-btn" data-testid="action-friendlier" type="button" onclick="improveAgain('friendly')">Friendlier</button>
+                    <button class="mini-btn" data-testid="action-stronger" type="button" onclick="improveAgain('confident')">Stronger</button>
+                    <button class="mini-btn" data-testid="action-technical" type="button" onclick="improveAgain('technical')">Technical</button>
+                    <button class="mini-btn" data-testid="action-simple" type="button" onclick="improveAgain('simple')">Simple</button>
                   </div>
+                  <div id="refineHint" class="upgrade-note hidden">Unlock refine options with Pro ✨</div>
                 </div>
               </div>
             </div>
@@ -984,12 +1257,38 @@
   <div class="cta-wrap">
     <div class="cta-inner">
       <div class="cta-meta">
-        <button id="rewriteBtn" class="primary-btn" type="button" onclick="handlePrimaryAction()">
-          <span class="spinner" aria-hidden="true"></span>
-          <span id="rewriteBtnLabel">✨ Improve my message</span>
+        <button id="rewriteBtn" data-testid="fix-button" class="primary-btn" type="button" onclick="handlePrimaryAction()">
+          <span class="spinner" data-testid="fix-button-spinner" aria-hidden="true"></span>
+          <span id="rewriteBtnLabel" data-testid="fix-button-label">✨ Improve my message</span>
         </button>
         <div class="cta-support">Clearer. More confident. Natural.</div>
       </div>
+    </div>
+  </div>
+
+  <div id="upgradeModal" class="modal-backdrop hidden" aria-hidden="true">
+    <div class="upgrade-modal" role="dialog" aria-modal="true" aria-labelledby="upgradeModalTitle">
+      <button class="modal-close" type="button" onclick="closeUpgradeModal()" aria-label="Close">Close</button>
+      <div class="modal-kicker">Upgrade</div>
+      <h3 id="upgradeModalTitle">✨ Write better messages every day</h3>
+      <p class="modal-copy">Say it better — every time</p>
+      <div class="pricing-grid">
+        <div class="price-card">
+          <div class="price-label">Free</div>
+          <div class="price-value">5 messages/day</div>
+          <div class="price-feature">Free (current plan)</div>
+        </div>
+        <div class="price-card price-card-pro">
+          <div class="price-badge">⭐ Most popular</div>
+          <div class="price-label">Pro</div>
+          <div class="price-value">$7/month</div>
+          <div class="price-feature">Unlimited rewrites</div>
+          <div class="price-feature">Better tone control</div>
+          <div class="price-feature">Faster results</div>
+        </div>
+      </div>
+      <button id="startProBtn" class="upgrade-cta modal-upgrade-btn" type="button" onclick="startProFlow()">✨ Start Pro — unlimited access</button>
+      <div class="trust-line">No commitment • Cancel anytime<br>Start improving your messages today</div>
     </div>
   </div>
 
@@ -1005,14 +1304,26 @@
     const improveSection = document.getElementById("improveSection");
     const afterCard = document.getElementById("afterCard");
     const outputCard = document.getElementById("outputCard");
+    const resultHeading = document.getElementById("resultHeading");
+    const limitStateNote = document.getElementById("limitStateNote");
+    const refineHint = document.getElementById("refineHint");
     const detectedLabel = document.getElementById("detectedLabel");
     const confidenceLine = document.getElementById("confidenceLine");
     const copyInlineBtn = document.getElementById("copyInlineBtn");
     const microFeedback = document.getElementById("microFeedback");
+    const usageIndicator = document.getElementById("usageIndicator");
+    const upgradeHint = document.getElementById("upgradeHint");
+    const upgradeNowBtn = document.getElementById("upgradeNowBtn");
+    const startProBtn = document.getElementById("startProBtn");
     const clarityIndicators = document.getElementById("clarityIndicators");
     const outputSection = document.getElementById("outputSection");
     const inputHint = document.querySelector(".input-hint");
     const composer = document.querySelector(".composer");
+    const textareaWrap = document.querySelector(".textarea-wrap");
+    const clearInputBtn = document.getElementById("clearInputBtn");
+    const useCaseChips = Array.from(document.querySelectorAll(".use-case-chip"));
+    const refineButtons = Array.from(document.querySelectorAll(".mini-btn"));
+    const upgradeModal = document.getElementById("upgradeModal");
 
     // const API_BASE_URL = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
     //   ? "http://127.0.0.1:8000"
@@ -1033,11 +1344,18 @@
     let currentOutput = "";
     let lastSourceText = "";
     let variationIndex = 0;
-    const DEFAULT_INPUT_HINT = "Say it any way — we’ll make it sound right";
-    const TECHNICAL_INPUT_HINT = "Say it any way — we’ll make it sound right  💡 Make this more technical?";
+    let pendingUseCaseType = "";
+    let isLimitStateActive = false;
+    const DEFAULT_INPUT_HINT = "Write anything — even broken English";
+    const TECHNICAL_INPUT_HINT = "Write anything — even broken English  💡 Make this more technical?";
     const SUGGESTION_HINT = "Tap 'Improve my message' to see the result";
     const PRIMARY_CTA_LABEL = "✨ Improve my message";
     const SECONDARY_CTA_LABEL = "✨ Improve again";
+    const UPGRADE_CTA_LABEL = "✨ Upgrade to continue";
+    const LIMIT_MESSAGE_SNIPPET = "used today’s free messages";
+    const DEFAULT_UPGRADE_HINT = "✨ Upgrade for unlimited rewrites, better tone control, and faster results";
+    const LAST_MESSAGE_NOTICE = "That was your last free message today.\nUnlock unlimited to keep going ✨";
+    const INVALID_INPUT_TYPE = "invalid_input";
 
     function setLoadingState(isLoading) {
       rewriteBtn.disabled = isLoading;
@@ -1045,7 +1363,99 @@
       copyBtn.disabled = isLoading;
       copyInlineBtn.disabled = isLoading;
       rewriteBtn.classList.toggle("loading", isLoading);
-      rewriteBtnLabel.textContent = isLoading ? "Improving..." : (currentOutput ? SECONDARY_CTA_LABEL : PRIMARY_CTA_LABEL);
+      rewriteBtnLabel.textContent = isLoading ? "Improving..." : (isLimitStateActive ? UPGRADE_CTA_LABEL : (currentOutput ? SECONDARY_CTA_LABEL : PRIMARY_CTA_LABEL));
+    }
+
+    function isLimitMessage(text) {
+      return typeof text === "string" && text.toLowerCase().includes(LIMIT_MESSAGE_SNIPPET);
+    }
+
+    function updateClearButtonVisibility() {
+      const hasValue = inputText.value.trim().length > 0;
+      clearInputBtn.hidden = !hasValue;
+    }
+
+    function setActiveUseCase(type = "") {
+      pendingUseCaseType = type;
+      useCaseChips.forEach((chip) => {
+        chip.classList.toggle("active", chip.dataset.useCase === type);
+      });
+    }
+
+    function getUseCaseConfig(type) {
+      const configs = {
+        job: { context: "Job Application", tone: "Professional" },
+        sales: { context: "Cold Outreach", tone: "Persuasive" },
+        teacher: { context: "Message", tone: "Polite" },
+        chat: { context: "WhatsApp", tone: "Casual" }
+      };
+      return configs[type] || { context: DEFAULT_CONTEXT, tone: selectedTone };
+    }
+
+    function setRefineButtonsDisabled(isDisabled) {
+      refineButtons.forEach((button) => {
+        button.classList.toggle("is-locked", isDisabled);
+        button.setAttribute("aria-disabled", isDisabled ? "true" : "false");
+        button.title = isDisabled ? "Upgrade to use this ✨" : "";
+      });
+    }
+
+    function updateUsageIndicator(usageCount, usageLimit) {
+      if (typeof usageCount === "number" && typeof usageLimit === "number") {
+        usageIndicator.textContent = `${usageCount} / ${usageLimit} free messages used today`;
+        usageIndicator.classList.remove("hidden");
+        return;
+      }
+      usageIndicator.textContent = "";
+      usageIndicator.classList.add("hidden");
+    }
+
+    function resetOutputState() {
+      isLimitStateActive = false;
+      afterCard.classList.remove("limit-warning");
+      output.classList.remove("limit-text");
+      output.classList.remove("hidden");
+      limitStateNote.classList.add("hidden");
+      refineHint.classList.add("hidden");
+      resultHeading.textContent = "✨ Here's a clearer, more confident version";
+      usageIndicator.classList.add("hidden");
+      usageIndicator.textContent = "";
+      upgradeHint.classList.add("hidden");
+      upgradeHint.classList.remove("limit-active");
+      upgradeHint.textContent = DEFAULT_UPGRADE_HINT;
+      upgradeNowBtn.classList.add("hidden");
+      copyBtn.classList.remove("hidden");
+      copyInlineBtn.classList.remove("hidden");
+      setRefineButtonsDisabled(false);
+    }
+
+    function activateInvalidInputState(message) {
+      afterCard.classList.remove("limit-warning");
+      output.classList.remove("hidden");
+      output.classList.remove("typing");
+      output.classList.remove("limit-text");
+      output.textContent = message;
+      resultHeading.textContent = "Try a real message";
+      detectedLabel.classList.add("hidden");
+      confidenceLine.classList.add("hidden");
+      microFeedback.classList.add("hidden");
+      clarityIndicators.classList.add("hidden");
+      copyBtn.classList.add("hidden");
+      copyInlineBtn.classList.add("hidden");
+      improveSection.classList.remove("visible");
+      refineHint.classList.add("hidden");
+      usageIndicator.classList.add("hidden");
+      usageIndicator.textContent = "";
+      limitStateNote.classList.remove("hidden");
+      limitStateNote.textContent = "Paste a real message and I'll clean it up.";
+      upgradeHint.classList.add("hidden");
+      upgradeNowBtn.classList.add("hidden");
+    }
+
+    function showUpgradeHint(isLimitState = false, message = DEFAULT_UPGRADE_HINT) {
+      upgradeHint.textContent = message;
+      upgradeHint.classList.remove("hidden");
+      upgradeHint.classList.toggle("limit-active", isLimitState);
     }
 
     function showResults() {
@@ -1059,6 +1469,7 @@
       copyBtn.classList.remove("hidden");
       copyInlineBtn.classList.remove("hidden");
       improveSection.classList.add("visible");
+      setRefineButtonsDisabled(false);
       rewriteBtnLabel.textContent = SECONDARY_CTA_LABEL;
     }
 
@@ -1074,11 +1485,59 @@
       confidenceLine.classList.add("hidden");
       microFeedback.classList.add("hidden");
       clarityIndicators.classList.add("hidden");
+      resetOutputState();
       composer.classList.remove("deemphasized");
       currentOutput = "";
       lastSourceText = "";
       variationIndex = 0;
       rewriteBtnLabel.textContent = PRIMARY_CTA_LABEL;
+      updateClearButtonVisibility();
+    }
+
+    function activateLimitState(message, usageCount, usageLimit) {
+      isLimitStateActive = true;
+      afterCard.classList.add("limit-warning");
+      output.classList.add("limit-text");
+      output.classList.add("hidden");
+      limitStateNote.classList.remove("hidden");
+      refineHint.classList.remove("hidden");
+      resultHeading.textContent = "✨ You’ve reached today’s limit";
+      detectedLabel.classList.add("hidden");
+      confidenceLine.classList.add("hidden");
+      microFeedback.classList.add("hidden");
+      clarityIndicators.classList.add("hidden");
+      copyBtn.classList.add("hidden");
+      copyInlineBtn.classList.add("hidden");
+      improveSection.classList.add("visible");
+      setRefineButtonsDisabled(true);
+      updateUsageIndicator(usageCount, usageLimit);
+      upgradeNowBtn.classList.remove("hidden");
+      showUpgradeHint(true, message);
+      rewriteBtnLabel.textContent = UPGRADE_CTA_LABEL;
+    }
+
+    function handleUpgradeClick() {
+      openUpgradeModal();
+      triggerOutputFlash();
+      scrollToOutput();
+    }
+
+    function openUpgradeModal() {
+      upgradeModal.classList.remove("hidden");
+      upgradeModal.setAttribute("aria-hidden", "false");
+    }
+
+    function closeUpgradeModal() {
+      upgradeModal.classList.add("hidden");
+      upgradeModal.setAttribute("aria-hidden", "true");
+      startProBtn.textContent = "✨ Start Pro — unlimited access";
+    }
+
+    function startProFlow() {
+      startProBtn.textContent = "Processing...";
+      setTimeout(() => {
+        closeUpgradeModal();
+      }, 900);
     }
 
     function clearTypingAnimation() {
@@ -1181,6 +1640,10 @@
     }
 
     function updateInputHint(text) {
+      if (pendingUseCaseType) {
+        inputHint.textContent = SUGGESTION_HINT;
+        return;
+      }
       inputHint.textContent = looksTechnical(text) ? TECHNICAL_INPUT_HINT : DEFAULT_INPUT_HINT;
     }
 
@@ -1192,14 +1655,31 @@
         chat: "Hey, just wanted to check in and see if you're free later."
       };
 
-      inputText.value = suggestions[type] || inputText.value;
-      inputHint.textContent = SUGGESTION_HINT;
-      inputText.classList.remove("filled");
-      void inputText.offsetWidth;
-      inputText.classList.add("filled");
-      setTimeout(() => {
+      if (!inputText.value.trim()) {
+        inputText.value = suggestions[type] || inputText.value;
         inputText.classList.remove("filled");
-      }, 220);
+        void inputText.offsetWidth;
+        inputText.classList.add("filled");
+        setTimeout(() => {
+          inputText.classList.remove("filled");
+        }, 220);
+      }
+
+      setActiveUseCase(type);
+      inputHint.textContent = SUGGESTION_HINT;
+      updateClearButtonVisibility();
+      rewriteBtnLabel.textContent = PRIMARY_CTA_LABEL;
+      currentOutput = "";
+      lastSourceText = "";
+      inputText.focus();
+    }
+
+    function clearInput() {
+      inputText.value = "";
+      setActiveUseCase("");
+      updateInputHint("");
+      updateClearButtonVisibility();
+      showEmptyState();
       inputText.focus();
     }
 
@@ -1282,15 +1762,55 @@
           return null;
         }
 
+        if (typeof data.text === "string" && data.text.trim()) {
+          return {
+            text: data.text.trim(),
+            messageType: data.message_type,
+            isLimitReached: Boolean(data.is_limit),
+            isPremium: Boolean(data.is_premium),
+            usageCount: data.usage?.used ?? data.usage_count,
+            usageLimit: data.usage?.limit ?? data.usage_limit,
+            usageNotice: data.usage_notice
+          };
+        }
+
+        if (typeof data.output === "string" && data.output.trim()) {
+          return {
+            text: data.output.trim(),
+            messageType: data.message_type,
+            isLimitReached: isLimitMessage(data.output),
+            isPremium: Boolean(data.is_premium),
+            usageCount: data.usage_count,
+            usageLimit: data.usage_limit,
+            usageNotice: data.usage_notice
+          };
+        }
+
         if (Array.isArray(data.versions) && data.versions.length) {
-          return data.versions[0].text;
+          return {
+            text: data.versions[0].text,
+            messageType: data.message_type,
+            isLimitReached: isLimitMessage(data.versions[0].text),
+            isPremium: Boolean(data.is_premium),
+            usageCount: data.usage_count,
+            usageLimit: data.usage_limit,
+            usageNotice: data.usage_notice
+          };
         }
 
         if (typeof data.rewritten_text === "string" && data.rewritten_text.trim()) {
-          return data.rewritten_text.trim();
+          return {
+            text: data.rewritten_text.trim(),
+            messageType: data.message_type,
+            isLimitReached: isLimitMessage(data.rewritten_text),
+            isPremium: Boolean(data.is_premium),
+            usageCount: data.usage_count,
+            usageLimit: data.usage_limit,
+            usageNotice: data.usage_notice
+          };
         }
 
-        return "";
+        return { text: "", messageType: "", isLimitReached: false, isPremium: false, usageCount: null, usageLimit: null, usageNotice: null };
       } finally {
         clearTimeout(timeoutId);
         if (currentRequestController === controller) {
@@ -1344,6 +1864,10 @@
     }
 
     function handlePrimaryAction() {
+      if (isLimitStateActive) {
+        handleUpgradeClick();
+        return;
+      }
       if (currentOutput && lastSourceText) {
         const variant = getVariantConfig();
         rewriteText({
@@ -1362,8 +1886,9 @@
       const sourceText = (override.text || inputText.value).trim();
       const style = override.style || DEFAULT_STYLE;
       const feedbackStyle = override.feedbackStyle || style;
-      const tone = override.tone || selectedTone;
-      const context = override.context || DEFAULT_CONTEXT;
+      const useCaseConfig = getUseCaseConfig(pendingUseCaseType);
+      const tone = override.tone || useCaseConfig.tone || selectedTone;
+      const context = override.context || useCaseConfig.context || DEFAULT_CONTEXT;
 
       if (!sourceText) {
         showEmptyState();
@@ -1384,24 +1909,48 @@
       confidenceLine.classList.add("hidden");
       microFeedback.classList.add("hidden");
       clarityIndicators.classList.add("hidden");
+      resetOutputState();
       output.textContent = "";
       afterCard.classList.add("shimmer");
       afterCard.classList.add("preparing");
 
       try {
-        const rewritten = await requestRewrite(buildPayload(sourceText, style, tone, context), currentRequestId);
+        const rewriteResult = await requestRewrite(buildPayload(sourceText, style, tone, context), currentRequestId);
+        const rewritten = rewriteResult?.text || "";
+        const messageType = rewriteResult?.messageType || "";
+        const limitReached = Boolean(rewriteResult?.isLimitReached);
+        const usageCount = rewriteResult?.usageCount;
+        const usageLimit = rewriteResult?.usageLimit;
+        const usageNotice = rewriteResult?.usageNotice;
         if (!rewritten) {
           throw new Error("No rewritten text was returned.");
         }
 
-        const polishedRewrite = polishRewrite(sourceText, rewritten);
-        currentOutput = polishedRewrite;
+        const finalText = limitReached ? rewritten : polishRewrite(sourceText, rewritten);
+        currentOutput = finalText;
         setTimeout(() => {
           afterCard.classList.remove("shimmer");
           afterCard.classList.remove("preparing");
-          typeText(polishedRewrite);
-          confidenceLine.classList.remove("hidden");
-          setMicroFeedback(sourceText, polishedRewrite, tone, feedbackStyle);
+          if (messageType === INVALID_INPUT_TYPE) {
+            activateInvalidInputState(rewritten);
+          } else if (limitReached) {
+            activateLimitState(finalText, usageCount, usageLimit);
+            openUpgradeModal();
+          } else {
+            updateUsageIndicator(usageCount, usageLimit);
+            typeText(finalText);
+            confidenceLine.classList.remove("hidden");
+            setMicroFeedback(sourceText, finalText, tone, feedbackStyle);
+            improveSection.classList.add("visible");
+            if (usageNotice === LAST_MESSAGE_NOTICE) {
+              setRefineButtonsDisabled(true);
+              refineHint.classList.remove("hidden");
+              showUpgradeHint(true, usageNotice);
+            } else {
+              refineHint.classList.add("hidden");
+              showUpgradeHint(false, DEFAULT_UPGRADE_HINT);
+            }
+          }
           triggerOutputFlash();
           scrollToOutput();
         }, 180);
@@ -1432,11 +1981,19 @@
     }
 
     function improveAgain(style) {
+      const button = document.querySelector(`.mini-btn[onclick="improveAgain('${style}')"]`);
+      if (button?.classList.contains("is-locked") || isLimitStateActive) {
+        if (button) {
+          button.title = "Upgrade to use this ✨";
+        }
+        showUpgradeHint(true, DEFAULT_UPGRADE_HINT);
+        openUpgradeModal();
+        return;
+      }
       const sourceText = currentOutput || output.textContent.trim();
       if (!sourceText) {
         return;
       }
-      const button = document.querySelector(`.mini-btn[onclick="improveAgain('${style}')"]`);
       animateImproveButton(button);
       const config = getImproveConfig(style);
       rewriteText({ text: sourceText, style: config.style, tone: config.tone, feedbackStyle: style });
@@ -1492,8 +2049,18 @@
       }
     });
 
+    upgradeModal.addEventListener("click", (e) => {
+      if (e.target === upgradeModal) {
+        closeUpgradeModal();
+      }
+    });
+
     inputText.addEventListener("input", (e) => {
+      if (!e.target.value.trim()) {
+        setActiveUseCase("");
+      }
       updateInputHint(e.target.value);
+      updateClearButtonVisibility();
     });
 
     output.addEventListener("click", () => {
@@ -1509,6 +2076,7 @@
 
     window.onload = () => {
       inputText.focus();
+      updateClearButtonVisibility();
       updateInputHint(inputText.value);
       showEmptyState();
     };

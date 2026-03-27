@@ -1,10 +1,11 @@
 import os
 import re
 import json
+from datetime import date
 from typing import Literal, Optional
 
 from dotenv import load_dotenv
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from openai import APIConnectionError, APIStatusError, APITimeoutError, OpenAI
 from pydantic import BaseModel, Field, field_validator
@@ -28,6 +29,15 @@ MAX_COMPLETION_TOKENS = 260
 OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions"
 OPENROUTER_MODEL_NAME = "openchat/openchat-3.5"
 OPENROUTER_ERROR_RESPONSES = {"AI service error", "Server error"}
+FREE_DAILY_LIMIT = 10
+FREE_LIMIT_MESSAGE = "You’ve used today’s free messages.\nCome back tomorrow — or unlock unlimited access ✨"
+LAST_FREE_MESSAGE_NOTICE = "That was your last free message today.\nUnlock unlimited to keep going ✨"
+INVALID_INPUT_RESPONSES = (
+    "That doesn't look like a real message. Try pasting something you'd send.",
+    "Looks like placeholder text — paste a real message and I'll clean it up.",
+    "That doesn't look like a real message. Try again with something you'd send.",
+)
+daily_usage_by_ip: dict[tuple[str, str], int] = {}
 
 MESSAGE_TYPE_GUIDANCE = {
     "Email": "Structure it cleanly, make the point early, and keep the flow polished.",
@@ -128,6 +138,7 @@ Principles:
 - Rewrite deeply when needed: reorder ideas, split or combine sentences, and replace weak phrasing.
 - Avoid mirroring the source sentence-by-sentence.
 - Rewrite for context and intent, not literal translation.
+- Do NOT preserve awkward phrases. Rewrite naturally like a native speaker. Keep it concise and clear.
 - Do NOT preserve awkward or unnatural phrases. Rewrite the message as a native speaker would naturally say it.
 - Do not carry over unusual, loaded, or awkward source words unless they clearly fit the situation.
 - Prefer clarity, simplicity, and natural tone over literal translation.
@@ -144,6 +155,10 @@ Before finalizing, silently check:
 2. Is it more concise or more efficient?
 3. Does it sound like a smart human wrote it?
 If not, refine once before answering.
+
+If the input is mostly symbols, placeholder text, or not a real message, respond like this instead:
+TYPE: invalid_input
+OUTPUT: a short, friendly note asking for a real message to rewrite.
 
 Always respond in exactly this format:
 TYPE: <message type>
@@ -224,6 +239,88 @@ def get_openrouter_api_key() -> str:
     if api_key == "your_api_key_here":
         raise HTTPException(status_code=500, detail="OPENROUTER_API_KEY is still using the placeholder value.")
     return api_key
+
+
+def get_client_ip(request: Request) -> str:
+    forwarded_for = request.headers.get("x-forwarded-for")
+    if forwarded_for:
+        first_ip = forwarded_for.split(",")[0].strip()
+        if first_ip:
+            return first_ip
+    if request.client and request.client.host:
+        return request.client.host
+    return "anonymous"
+
+
+def get_daily_usage_count(client_ip: str) -> int:
+    usage_key = (client_ip, date.today().isoformat())
+    return daily_usage_by_ip.get(usage_key, 0)
+
+
+def consume_free_usage(client_ip: str) -> tuple[bool, int]:
+    usage_key = (client_ip, date.today().isoformat())
+    current_count = daily_usage_by_ip.get(usage_key, 0)
+    if current_count >= FREE_DAILY_LIMIT:
+        return False, current_count
+    updated_count = current_count + 1
+    daily_usage_by_ip[usage_key] = updated_count
+    return True, updated_count
+
+
+def build_rewrite_response(
+    output_text: str,
+    message_type: str = "Message",
+    is_limit: bool = False,
+    is_premium: bool = False,
+    usage_count: Optional[int] = None,
+    usage_limit: Optional[int] = None,
+    usage_notice: Optional[str] = None,
+) -> dict[str, object]:
+    return {
+        "text": output_text,
+        "is_limit": is_limit,
+        "is_premium": is_premium,
+        "usage": {
+            "used": usage_count,
+            "limit": usage_limit,
+        },
+        "output": output_text,
+        "versions": [
+            {
+                "label": "Improved",
+                "text": output_text,
+            }
+        ],
+        "rewritten_text": output_text,
+        "message_type": message_type,
+        "usage_count": usage_count,
+        "usage_limit": usage_limit,
+        "usage_notice": usage_notice,
+    }
+
+
+def looks_invalid_input(text: str) -> bool:
+    alpha_tokens = re.findall(r"[A-Za-z]+(?:['-][A-Za-z]+)?", text)
+    alnum_chars = re.findall(r"[A-Za-z0-9]", text)
+    symbol_chars = re.findall(r"[^\w\s]", text)
+
+    if not alnum_chars:
+        return True
+    if symbol_chars and len(symbol_chars) > len(alnum_chars):
+        return True
+    if not alpha_tokens:
+        return True
+    if len(alpha_tokens) < 3 and sum(len(token) for token in alpha_tokens) < 5:
+        return True
+
+    return False
+
+
+def build_invalid_input_response() -> dict[str, object]:
+    return build_rewrite_response(
+        INVALID_INPUT_RESPONSES[0],
+        message_type="invalid_input",
+    )
 
 
 def normalize_whitespace(text: str) -> str:
@@ -660,12 +757,36 @@ def request_openrouter_rewrite(
 
 
 @app.post("/rewrite")
-def rewrite_text(request: RewriteRequest):
+def rewrite_text(request: RewriteRequest, http_request: Request):
+    if looks_invalid_input(request.text):
+        return build_invalid_input_response()
+
     prompt, fallback_type, source_for_similarity = build_prompt(request)
-    premium_user = False
+    is_premium = (
+        http_request.query_params.get("premium") == "true"
+        or http_request.headers.get("X-User-Type") == "premium"
+    )
+    usage_count = None
+    usage_notice = None
+    client_ip = get_client_ip(http_request)
+    if not is_premium:
+        has_usage_remaining, usage_count = consume_free_usage(client_ip)
+        print(f"[USAGE] {usage_count}/{FREE_DAILY_LIMIT} for {client_ip}")
+        if not has_usage_remaining:
+            print("Usage limit reached:", client_ip)
+            return build_rewrite_response(
+                FREE_LIMIT_MESSAGE,
+                message_type="Limit Reached",
+                is_limit=True,
+                is_premium=False,
+                usage_count=usage_count,
+                usage_limit=FREE_DAILY_LIMIT,
+            )
+        if usage_count == FREE_DAILY_LIMIT:
+            usage_notice = LAST_FREE_MESSAGE_NOTICE
 
     try:
-        if premium_user:
+        if is_premium:
             print("Provider: OpenAI")
             client = get_openai_client()
             parsed = request_rewrite(
@@ -706,14 +827,12 @@ def rewrite_text(request: RewriteRequest):
     except Exception as exc:
         raise HTTPException(status_code=500, detail="Unexpected server error while rewriting text.") from exc
 
-    return {
-        "output": parsed["output"],
-        "versions": [
-            {
-                "label": "Improved",
-                "text": parsed["output"],
-            }
-        ],
-        "rewritten_text": parsed["output"],
-        "message_type": parsed["type"],
-    }
+    return build_rewrite_response(
+        parsed["output"],
+        message_type=parsed["type"],
+        is_limit=False,
+        is_premium=is_premium,
+        usage_count=usage_count,
+        usage_limit=FREE_DAILY_LIMIT if not is_premium else None,
+        usage_notice=usage_notice,
+    )
